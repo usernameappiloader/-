@@ -1,0 +1,205 @@
+{
+  "categories": [
+    {
+      "id": 1,
+      "name": "Applications Mobiles",
+      "icon": "fas fa-mobile-alt",
+      "description": "Applications pour Android et iOS",
+      "count": 2
+    },
+    {
+      "id": 2,
+      "name": "Logiciels PC",
+      "icon": "fas fa-desktop",
+      "description": "Logiciels pour Windows, Mac et Linux",
+      "count": 1
+    },
+    {
+      "id": 3,
+      "name": "Jeux",
+      "icon": "fas fa-gamepad",
+      "description": "Jeux gratuits et démos",
+      "count": 1
+    },
+    {
+      "id": 4,
+      "name": "Documents & Guides",
+      "icon": "fas fa-file-pdf",
+      "description": "Guides, manuels et documents utiles",
+      "count": 1
+    },
+    {
+      "id": 5,
+      "name": "Outils & Utilitaires",
+      "icon": "fas fa-tools",
+      "description": "Outils pratiques et utilitaires",
+      "count": 1
+    },
+    {
+      "id": 6,
+      "name": "Multimédia",
+      "icon": "fas fa-photo-video",
+      "description": "Lecteurs vidéo, éditeurs photo, etc.",
+      "count": 1
+    }
+  ],
+  "downloads": [
+    {
+      "id": 1,
+      "name": "WhatsApp Desktop",
+      "category": "Applications Mobiles",
+      "categoryId": 1,
+      "description": "Application de messagerie instantanée pour rester connecté avec vos proches depuis votre ordinateur. Interface moderne et synchronisation parfaite avec votre téléphone.",
+      "url": "https://www.whatsapp.com/download",
+      "version": "2.2347.4",
+      "size": "150 MB",
+      "downloads": 1250,
+      "image": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjMjVEMzY2Ii8+CjxwYXRoIGQ9Ik0xMDAgNDBDNjcuOSA0MCA0MCA2Ny45IDQwIDEwMEM0MCA5Ny4xIDQwLjggOTQuNCA0Mi4yIDkyTDQwIDEyMEw2OC4yIDExNy45QzcwLjYgMTE5LjIgNzMuMiAxMjAgNzYgMTIwSDEwMEMxMzIuMSAxMjAgMTYwIDkyLjEgMTYwIDYwQzE2MCA0Ny45IDE1Mi4xIDQwIDEwMCA0MFoiIGZpbGw9IndoaXRlIi8+CjxyZWN0IHg9IjYwIiB5PSI2MCIgd2lkdGg9IjgwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjMjVEMzY2Ii8+CjwvdXN2Zz4K",
+      "dateAdded": "2024-01-15T10:30:00.000Z",
+      "featured": true
+    },
+    {
+      "id": 2,
+      "name": "VLC Media Player",
+      "category": "Multimédia",
+      "categoryId": 6,
+      "description": "Lecteur multimédia gratuit et open source capable de lire pratiquement tous les formats vidéo et audio. Interface simple et fonctionnalités avancées.",
+      "url": "https://www.videolan.org/vlc/",
+      "version": "3.0.18",
+      "size": "45 MB",
+      "downloads": 2100,
+      "image": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRkY4QzAwIi8+CjxjaXJjbGUgY3g9IjEwMCIgY3k9IjEwMCIgcj0iNDAiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik04NSA3NUwxMjUgMTAwTDg1IDEyNVY3NVoiIGZpbGw9IiNGRjhDMDAiLz4KPC9zdmc+Cg==",
+      "dateAdded": "2024-01-14T14:20:00.000Z",
+      "featured": true
+    },
+    {
+      "id": 3,
+      "name": "Visual Studio Code",
+      "category": "Logiciels PC",
+      "categoryId": 2,
+      "description": "Éditeur de code source gratuit et puissant développé par Microsoft avec support pour de nombreux langages de programmation et extensions.",
+      "url": "https://code.visualstudio.com/",
+      "version": "1.84.2",
+      "size": "85 MB",
+      "downloads": 1800,
+      "image": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjMDA3QUNDIi8+CjxwYXRoIGQ9Ik0xNDAgNDBMMTAwIDgwTDYwIDQwTDQwIDYwTDgwIDEwMEw0MDE0MEw2MDE2MEwxMDAxMjBMMTQwMTYwTDE2MDE0MEwxNDAgNDBaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K",
+      "dateAdded": "2024-01-13T09:15:00.000Z",
+      "featured": false
+    },
+    {
+      "id": 4,
+      "name": "Minecraft",
+      "category": "Jeux",
+      "categoryId": 3,
+      "description": "Jeu de construction et d'aventure en monde ouvert où votre créativité est la seule limite. Explorez, construisez et survivez dans des mondes infinis.",
+      "url": "https://www.minecraft.net/",
+      "version": "1.20.2",
+      "size": "500 MB",
+      "downloads": 3200,
+      "image": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjNjJCNDdBIi8+CjxyZWN0IHg9IjQwIiB5PSI0MCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjOENCNzNEIi8+CjxyZWN0IHg9IjEyMCIgeT0iNDAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgZmlsbD0iIzhDQjczRCIvPgo8cmVjdCB4PSI0MCIgeT0iMTIwIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiM4Q0I3M0QiLz4KPHJlY3QgeD0iMTIwIiB5PSIxMjAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgZmlsbD0iIzhDQjczRCIvPgo8L3N2Zz4K",
+      "dateAdded": "2024-01-12T16:45:00.000Z",
+      "featured": true
+    },
+    {
+      "id": 5,
+      "name": "Guide PDF - Développement Web",
+      "category": "Documents & Guides",
+      "categoryId": 4,
+      "description": "Guide complet pour apprendre le développement web moderne avec HTML5, CSS3 et JavaScript. Parfait pour les débutants et intermédiaires.",
+      "url": "#",
+      "version": "2023.1",
+      "size": "15 MB",
+      "downloads": 890,
+      "image": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjREMzNTQ1Ii8+CjxyZWN0IHg9IjUwIiB5PSI0MCIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMjAiIGZpbGw9IndoaXRlIi8+CjxyZWN0IHg9IjYwIiB5PSI2MCIgd2lkdGg9IjgwIiBoZWlnaHQ9IjgiIGZpbGw9IiNEQzM1NDUiLz4KPHJlY3QgeD0iNjAiIHk9Ijc1IiB3aWR0aD0iNjAiIGhlaWdodD0iOCIgZmlsbD0iI0RDMzU0NSIvPgo8cmVjdCB4PSI2MCIgeT0iOTAiIHdpZHRoPSI3MCIgaGVpZ2h0PSI4IiBmaWxsPSIjREMzNTQ1Ii8+CjwvdXN2Zz4K",
+      "dateAdded": "2024-01-11T11:30:00.000Z",
+      "featured": false
+    },
+    {
+      "id": 6,
+      "name": "WinRAR",
+      "category": "Outils & Utilitaires",
+      "categoryId": 5,
+      "description": "Logiciel de compression et décompression de fichiers supportant de nombreux formats d'archives. Interface intuitive et performances optimales.",
+      "url": "https://www.win-rar.com/",
+      "version": "6.24",
+      "size": "3.2 MB",
+      "downloads": 1650,
+      "image": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRkZDMTA3Ii8+CjxyZWN0IHg9IjYwIiB5PSI2MCIgd2lkdGg9IjgwIiBoZWlnaHQ9IjgwIiBmaWxsPSIjMzQzQTQwIi8+CjxyZWN0IHg9IjcwIiB5PSI3MCIgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjRkZDMTA3Ii8+CjxyZWN0IHg9Ijg1IiB5PSI4NSIgd2lkdGg9IjMwIiBoZWlnaHQ9IjMwIiBmaWxsPSIjMzQzQTQwIi8+CjwvdXN2Zz4K",
+      "dateAdded": "2024-01-10T13:20:00.000Z",
+      "featured": false
+    },
+    {
+      "id": 7,
+      "name": "Telegram Desktop",
+      "category": "Applications Mobiles",
+      "categoryId": 1,
+      "description": "Application de messagerie sécurisée et rapide avec chiffrement de bout en bout. Synchronisation multi-appareils et fonctionnalités avancées.",
+      "url": "https://desktop.telegram.org/",
+      "version": "4.11.8",
+      "size": "65 MB",
+      "downloads": 980,
+      "image": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjMjY5NkZFIi8+CjxwYXRoIGQ9Ik0xNjAgNDBMNDAgMTAwTDgwIDEyMEwxMjAgODBMMTYwIDE2MEwxNDAgNDBaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K",
+      "dateAdded": "2024-01-09T15:45:00.000Z",
+      "featured": false
+    }
+  ],
+  "stats": {
+    "totalDownloads": 12870,
+    "todayDownloads": 67,
+    "totalApps": 7,
+    "totalCategories": 6,
+    "lastUpdated": "2024-01-15T12:00:00.000Z"
+  },
+  "settings": {
+    "adminEmail": "siakakeita272@gmail.com",
+    "adminPassword": "Keita1234.",
+    "siteName": "Download Hub",
+    "siteDescription": "Votre destination pour les téléchargements gratuits et sécurisés",
+    "maxFileSize": "500MB",
+    "allowedFileTypes": ["exe", "msi", "dmg", "apk", "pdf", "zip", "rar", "deb"],
+    "lastLogin": null,
+    "maintenanceMode": false,
+    "analyticsEnabled": true,
+    "backupEnabled": true,
+    "autoBackupInterval": "daily"
+  },
+  "recentActivity": [
+    {
+      "id": 1,
+      "type": "download",
+      "message": "VLC Media Player a été téléchargé",
+      "time": "2024-01-15T11:45:00.000Z",
+      "downloadId": 2
+    },
+    {
+      "id": 2,
+      "type": "download",
+      "message": "Minecraft a été téléchargé",
+      "time": "2024-01-15T11:30:00.000Z",
+      "downloadId": 4
+    },
+    {
+      "id": 3,
+      "type": "upload",
+      "message": "Telegram Desktop a été ajouté",
+      "time": "2024-01-15T10:15:00.000Z",
+      "downloadId": 7
+    },
+    {
+      "id": 4,
+      "type": "download",
+      "message": "WhatsApp Desktop a été téléchargé",
+      "time": "2024-01-15T09:20:00.000Z",
+      "downloadId": 1
+    },
+    {
+      "id": 5,
+      "type": "download",
+      "message": "Visual Studio Code a été téléchargé",
+      "time": "2024-01-15T08:45:00.000Z",
+      "downloadId": 3
+    }
+  ],
+  "version": "1.0.0",
+  "lastBackup": "2024-01-15T00:00:00.000Z"
+}
