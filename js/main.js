@@ -205,12 +205,9 @@ class DownloadHub {
         if (categoryFilter) {
             categoryFilter.value = categoryId;
         }
-        
-        // Debug logging
-        console.log('Filtering by category ID:', categoryId, typeof categoryId);
-        
         this.filterAndDisplayDownloads();
     }
+
 
     // Handle sorting
     handleSort(sortBy) {
@@ -234,21 +231,11 @@ class DownloadHub {
             );
         }
 
-        // Apply category filter - fixed logic
+        // Apply category filter
         if (this.currentCategory && this.currentCategory !== '') {
-            const categoryId = parseInt(this.currentCategory);
-            console.log('Filtering downloads by categoryId:', categoryId);
-            console.log('Available downloads before filter:', downloads.map(d => ({name: d.name, categoryId: d.categoryId, category: d.category})));
-            
-            downloads = downloads.filter(download => {
-                // Ensure both values are integers for comparison
-                const downloadCategoryId = parseInt(download.categoryId);
-                const match = downloadCategoryId === categoryId;
-                console.log(`${download.name} (categoryId: ${downloadCategoryId}) matches ${categoryId}:`, match);
-                return match;
-            });
-            
-            console.log('Filtered downloads:', downloads.map(d => d.name));
+            downloads = downloads.filter(download => 
+                String(download.categoryId) === String(this.currentCategory)
+            );
         }
 
         // Apply sorting
@@ -260,6 +247,7 @@ class DownloadHub {
         // Update category display to reflect current counts
         this.updateCategoryDisplay();
     }
+
 
     // Update category display
     updateCategoryDisplay() {
@@ -354,10 +342,11 @@ class DownloadHub {
     }
 
     // Track download and increment counter with real user info
-    trackDownload(downloadId) {
-        // Collect real user information
+    async trackDownload(downloadId) {
+        const ipAddress = await this.getUserIP(); // Attend la résolution de la promesse
+
         const userInfo = {
-            ip: this.getUserIP(),
+            ip: ipAddress, // L'adresse IP est maintenant une chaîne de caractères
             userAgent: navigator.userAgent,
             timestamp: new Date().toISOString(),
             referrer: document.referrer || 'Direct',
@@ -367,23 +356,27 @@ class DownloadHub {
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
         };
         
-        window.dataStorage.incrementDownloadCount(downloadId, userInfo);
-        this.loadStats(); // Update stats display
+         window.dataStorage.incrementDownloadCount(downloadId, userInfo);
+        this.loadStats();
         
-        // Show success message
         this.showNotification('Téléchargement commencé !', 'success');
     }
 
-    // Get user IP (approximation using external service)
+
     async getUserIP() {
+        // NOTE : Cette fonction dépend du service externe api.ipify.org.
+        // Assurez-vous que ses conditions d'utilisation sont compatibles avec votre projet.
         try {
             const response = await fetch('https://api.ipify.org?format=json');
+            if (!response.ok) return 'Unknown';
             const data = await response.json();
             return data.ip;
         } catch (error) {
+            // Pas d'alerte console en production
             return 'Unknown';
         }
     }
+
 
     // Load and display statistics
     loadStats() {
