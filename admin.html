@@ -58,10 +58,43 @@
                                 <i class="fas fa-chart-line me-2"></i>Statistiques
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#uploadImageModal">
+                                <i class="fas fa-image me-2"></i>Uploader une image
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </nav>
 
+                <!-- Upload Image Modal -->
+                <div class="modal fade" id="uploadImageModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Uploader une image dans Firebase Storage</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <form id="uploadImageForm">
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label for="firebaseImageFile" class="form-label">Choisir une image</label>
+                                        <input type="file" class="form-control" id="firebaseImageFile" accept="image/*" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="firebaseImageName" class="form-label">Nom du fichier (optionnel)</label>
+                                        <input type="text" class="form-control" id="firebaseImageName" placeholder="Nom du fichier dans le storage">
+                                    </div>
+                                    <div id="firebaseImageUploadStatus" class="form-text"></div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                    <button type="submit" class="btn btn-primary">Uploader</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             <!-- Main content -->
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
                 <!-- Dashboard Section -->
@@ -417,10 +450,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="js/firebase-init.js"></script>
-    <script src="js/firebase-auth.js"></script>
+    <script src="js/storage.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/admin.js"></script>
 </body>
