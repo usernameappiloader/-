@@ -96,25 +96,15 @@ class AuthManager {
         this.showLoading(false);
     }
 
-    // Validate credentials using Firestore
-    async validateCredentials(email, password) {
+    // Validate credentials
+    validateCredentials(email, password) {
         try {
-            const db = firebase.firestore();
-            const adminRef = db.collection('settings').doc('admin');
-            const adminDoc = await adminRef.get();
-            
-            if (!adminDoc.exists) {
-                // Create admin credentials if they don't exist
-                await adminRef.set({
-                    email: 'siakakeita272@gmail.com',
-                    password: 'Keita1234.',
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                return email === 'siakakeita272@gmail.com' && password === 'Keita1234.';
+            if (!window.dataStorage) {
+                console.error('DataStorage not initialized');
+                return false;
             }
-            
-            const adminData = adminDoc.data();
-            return email === adminData.email && password === adminData.password;
+            const settings = window.dataStorage.getSettings();
+            return email === settings.adminEmail && password === settings.adminPassword;
         } catch (error) {
             console.error('Error validating credentials:', error);
             return false;
