@@ -1,10 +1,11 @@
 // ===== FIRESTORE DATA STORAGE MANAGEMENT =====
 // Nécessite l'initialisation de Firebase dans firebase-init.js
 
+// ===== FIRESTORE DATA STORAGE MANAGEMENT (VERSION FINALE ET COMPLÈTE) =====
+
 class FirestoreStorage {
     constructor() {
-        // La base de données est la seule chose dont nous avons besoin
-        this.db = window.db; 
+        this.db = window.db; // On utilise uniquement la base de données
     }
 
     // Fonction interne pour convertir une image en texte (Base64)
@@ -17,44 +18,7 @@ class FirestoreStorage {
         });
     }
 
-    // --- Fonctions de gestion des téléchargements (MODIFIÉES) ---
-
-    async addDownload(downloadData) {
-        try {
-            // Si une image est fournie, on la convertit
-            if (downloadData.image instanceof File) {
-                downloadData.image = await this._fileToBase64(downloadData.image);
-            }
-
-            const ref = await this.db.collection('downloads').add(downloadData);
-            // ... (le reste de la fonction est bon)
-            await this.addActivity('upload', `${downloadData.name} a été ajouté au catalogue`, ref.id);
-            return { id: ref.id, ...downloadData };
-        } catch (error) {
-            console.error("Error adding download:", error);
-            return null;
-        }
-    }
-
-    async updateDownload(id, downloadData) {
-        try {
-            // Si une NOUVELLE image est fournie, on la convertit
-            if (downloadData.image instanceof File) {
-                downloadData.image = await this._fileToBase64(downloadData.image);
-            }
-
-            await this.db.collection('downloads').doc(id.toString()).update(downloadData);
-            // ... (le reste de la fonction est bon)
-            await this.addActivity('update', `${downloadData.name} a été mis à jour`, id);
-            return this.getDownloadById(id);
-        } catch (error) {
-            console.error("Error updating download:", error);
-            return null;
-        }
-    }
-
-    // --- Le reste du fichier est correct et n'a pas besoin de changer ---
-    
+    // --- Catégories ---
     async getCategories() {
         const snapshot = await this.db.collection('categories').get();
         return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -74,7 +38,7 @@ class FirestoreStorage {
         await this.db.collection('categories').doc(id.toString()).update(categoryData);
         return this.getCategoryById(id);
     }
-    
+
     async deleteCategory(id) {
         await this.db.collection('categories').doc(id.toString()).delete();
         const downloads = await this.getDownloads();
@@ -86,6 +50,7 @@ class FirestoreStorage {
         return true;
     }
 
+    // --- Téléchargements (avec conversion d'image) ---
     async getDownloads() {
         const snapshot = await this.db.collection('downloads').orderBy('name').get();
         return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -96,13 +61,69 @@ class FirestoreStorage {
         return doc.exists ? { id: doc.id, ...doc.data() } : null;
     }
 
+    async addDownload(downloadData) {
+        if (downloadData.image instanceof File) {
+            downloadData.image = await this._fileToBase64(downloadData.image);
+        }
+        const ref = await this.db.collection('downloads').add(downloadData);
+        await this.addActivity('upload', `${downloadData.name} a été ajouté`, ref.id);
+        return { id: ref.id, ...downloadData };
+    }
+
+    async updateDownload(id, downloadData) {
+        if (downloadData.image instanceof File) {
+            downloadData.image = await this._fileToBase64(downloadData.image);
+        }
+        await this.db.collection('downloads').doc(id.toString()).update(downloadData);
+        await this.addActivity('update', `${downloadData.name} a été mis à jour`, id);
+        return this.getDownloadById(id);
+    }
+
     async deleteDownload(id) {
         const download = await this.getDownloadById(id);
+        if (!download) return false;
         await this.db.collection('downloads').doc(id.toString()).delete();
         await this.addActivity('delete', `${download.name} a été supprimé`, id);
         return true;
     }
-    
+
+    // --- Activités (FONCTION MANQUANTE) ---
+    async getRecentActivity() {
+        const snapshot = await this.db.collection('activities').orderBy('time', 'desc').limit(100).get();
+        return snapshot.docs.map(doc => doc.data());
+    }
+
+    async addActivity(type, message, downloadId = null, userInfo = null) {
+        const activity = {
+            id: Date.now(),
+            type,
+            message,
+            time: new Date().toISOString(),
+            downloadId,
+            userInfo: userInfo || { ip: 'Unknown', userAgent: navigator.userAgent }
+        };
+        await this.db.collection('activities').add(activity);
+        return activity;
+    }
+
+    // --- Statistiques (FONCTION MANQUANTE) ---
+    async getStats() {
+        const downloads = await this.getDownloads();
+        const categories = await this.getCategories();
+        const activities = await this.getRecentActivity();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayDownloads = activities.filter(a => a.type === 'download' && new Date(a.time) >= today).length;
+        return {
+            totalDownloads: downloads.reduce((sum, d) => sum + (d.downloads || 0), 0),
+            todayDownloads,
+            totalApps: downloads.length,
+            totalCategories: categories.length,
+            lastUpdated: new Date().toISOString()
+        };
+    }
+
+    // --- Paramètres ---
     async getSettings() {
         const doc = await this.db.collection('settings').doc('main').get();
         return doc.exists ? doc.data() : {};
@@ -112,41 +133,7 @@ class FirestoreStorage {
         await this.db.collection('settings').doc('main').set(newSettings, { merge: true });
         return this.getSettings();
     }
-
-    // Import/export (optionnel)
-    async exportData() {
-        const [categories, downloads, stats, settings] = await Promise.all([
-            this.getCategories(),
-            this.getDownloads(),
-            this.getStats(),
-            this.getSettings()
-        ]);
-        return JSON.stringify({ categories, downloads, stats, settings, exportDate: new Date().toISOString() }, null, 2);
-    }
-
-    async importData(jsonData) {
-        const data = JSON.parse(jsonData);
-        const batch = this.db.batch();
-        if (data.categories) {
-            data.categories.forEach(cat => {
-                const ref = this.db.collection('categories').doc(cat.id ? cat.id.toString() : undefined);
-                batch.set(ref, cat);
-            });
-        }
-        if (data.downloads) {
-            data.downloads.forEach(dl => {
-                const ref = this.db.collection('downloads').doc(dl.id ? dl.id.toString() : undefined);
-                batch.set(ref, dl);
-            });
-        }
-        if (data.settings) {
-            const ref = this.db.collection('settings').doc('main');
-            batch.set(ref, data.settings);
-        }
-        await batch.commit();
-        return true;
-    }
 }
 
-// Remplace l'instance globale
+// Initialise l'instance globale
 window.dataStorage = new FirestoreStorage();
