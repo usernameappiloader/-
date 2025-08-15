@@ -45,71 +45,73 @@ class AuthManager {
 
     // Handle login form submission
     async handleLogin(event) {
-        event.preventDefault();
+    event.preventDefault();
+    
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const rememberMe = document.getElementById('rememberMe').checked;
+    
+    this.showLoading(true);
+    this.hideAlert();
+    
+    await this.delay(1000);
+    
+    try {
+        if (!window.dataStorage) {
+            throw new Error('Système de stockage non disponible. Veuillez recharger la page.');
+        }
         
-        const email = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value;
-        const rememberMe = document.getElementById('rememberMe').checked;
+        // CORRECTION : On attend (await) que la validation soit terminée
+        const isValid = await this.validateCredentials(email, password);
         
-        // Show loading state
-        this.showLoading(true);
-        this.hideAlert();
-        
-        // Simulate network delay for better UX
-        await this.delay(1000);
-        
-        try {
-            // Check if dataStorage is available
-            if (!window.dataStorage) {
-                throw new Error('Système de stockage non disponible. Veuillez recharger la page.');
+        if (isValid) {
+            this.saveLoginState(email, rememberMe);
+            
+            if (rememberMe) {
+                this.saveCredentials(email, password);
+            } else {
+                this.clearSavedCredentials();
             }
             
-            // Validate credentials
-            if (this.validateCredentials(email, password)) {
-                // Save login state
-                this.saveLoginState(email, rememberMe);
-                
-                // Save credentials if remember me is checked
-                if (rememberMe) {
-                    this.saveCredentials(email, password);
-                } else {
-                    this.clearSavedCredentials();
-                }
-                
-                // Show success message
-                this.showSuccess('Connexion réussie ! Redirection en cours...');
-                
-                // Redirect to admin panel after delay
-                setTimeout(() => {
-                    window.location.href = 'admin.html';
-                }, 1500);
-                
-            } else {
-                // Show error message
-                this.showError('Email ou mot de passe incorrect. Veuillez réessayer.');
-            }
-        } catch (error) {
-            console.error('Login error:', error);
-            this.showError(error.message || 'Une erreur est survenue lors de la connexion. Veuillez réessayer.');
+            this.showSuccess('Connexion réussie ! Redirection en cours...');
+            
+            setTimeout(() => {
+                window.location.href = 'admin.html';
+            }, 1500);
+            
+        } else {
+            this.showError('Email ou mot de passe incorrect. Veuillez réessayer.');
         }
-        
-        this.showLoading(false);
+    } catch (error) {
+        console.error('Login error:', error);
+        this.showError(error.message || 'Une erreur est survenue lors de la connexion. Veuillez réessayer.');
     }
+    
+    this.showLoading(false);
+}
 
-    // Validate credentials
-    validateCredentials(email, password) {
-        try {
-            if (!window.dataStorage) {
-                console.error('DataStorage not initialized');
-                return false;
-            }
-            const settings = window.dataStorage.getSettings();
-            return email === settings.adminEmail && password === settings.adminPassword;
-        } catch (error) {
-            console.error('Error validating credentials:', error);
+// FONCTION 2 À REMPLACER
+async validateCredentials(email, password) {
+    try {
+        if (!window.dataStorage) {
+            console.error('DataStorage not initialized');
             return false;
         }
+        // CORRECTION : On attend (await) de recevoir les paramètres de Firestore
+        const settings = await window.dataStorage.getSettings();
+        
+        // Vérification que les paramètres ont bien été chargés
+        if (!settings || !settings.adminEmail) {
+            console.error('Les paramètres (settings) n\'ont pas pu être chargés depuis Firestore.');
+            return false;
+        }
+
+        return email === settings.adminEmail && password === settings.adminPassword;
+    } catch (error) {
+        console.error('Error validating credentials:', error);
+        return false;
     }
+}
 
     // Save login state
     saveLoginState(email, rememberMe) {
