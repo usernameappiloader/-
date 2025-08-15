@@ -12,35 +12,15 @@ class AdminPanel {
         this.setupEventListeners();
         this.loadDashboard();
         this.setupFileUpload();
-        this.setupFirebaseImageUpload();
-    }
-    // Setup Firebase image upload modal
-    setupFirebaseImageUpload() {
-        const uploadImageForm = document.getElementById('uploadImageForm');
-        if (!uploadImageForm) return;
-        uploadImageForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const fileInput = document.getElementById('firebaseImageFile');
-            const nameInput = document.getElementById('firebaseImageName');
-            const statusDiv = document.getElementById('firebaseImageUploadStatus');
-            if (!fileInput.files.length) {
-                statusDiv.textContent = 'Veuillez sélectionner une image.';
-                return;
-            }
-            const file = fileInput.files[0];
-            const fileName = nameInput.value ? nameInput.value : Date.now() + '_' + file.name;
-            statusDiv.textContent = 'Envoi en cours...';
-            try {
-                const storageRef = firebase.storage().ref('images/' + fileName);
-                const snapshot = await storageRef.put(file);
-                const downloadURL = await snapshot.ref.getDownloadURL();
-                statusDiv.innerHTML = `<span class='text-success'>Image uploadée !</span><br>Lien : <a href='${downloadURL}' target='_blank'>${downloadURL}</a>`;
-            } catch (error) {
-                statusDiv.innerHTML = `<span class='text-danger'>Erreur : ${error.message}</span>`;
-            }
-        });
+        // La fonction setupFirebaseImageUpload a été supprimée car elle n'est plus utile.
     }
 
+    // --- FONCTION SUPPRIMÉE ---
+    // setupFirebaseImageUpload() a été retirée.
+
+    // ... (le reste du fichier reste identique, car il envoie déjà le fichier
+    // à firestore-storage.js qui s'occupe maintenant de la conversion)
+    
     // Check if user is authenticated
     checkAuthentication() {
         if (!window.authManager || !window.authManager.isAuthenticated()) {
@@ -48,7 +28,6 @@ class AdminPanel {
             return;
         }
         
-        // Display admin email
         const user = window.authManager.getCurrentUser();
         if (user) {
             const adminEmailElement = document.getElementById('adminEmail');
@@ -111,7 +90,7 @@ class AdminPanel {
     // Handle sidebar navigation
     handleNavigation(e) {
         e.preventDefault();
-        const section = e.target.getAttribute('data-section');
+        const section = e.currentTarget.getAttribute('data-section');
         if (section) {
             this.showSection(section);
         }
@@ -160,18 +139,15 @@ class AdminPanel {
     }
 
     // Load dashboard data
-    loadDashboard() {
-        const stats = window.dataStorage.getStats();
-        
-        // Update dashboard stats
-        document.getElementById('dashTotalApps').textContent = stats.totalApps;
-        document.getElementById('dashTotalDownloads').textContent = this.formatNumber(stats.totalDownloads);
-        document.getElementById('dashTotalCategories').textContent = stats.totalCategories;
-        document.getElementById('dashTodayDownloads').textContent = stats.todayDownloads;
+    async loadDashboard() {
+    const stats = await window.dataStorage.getStats();
+    document.getElementById('dashTotalApps').textContent = stats.totalApps;
+    document.getElementById('dashTotalDownloads').textContent = this.formatNumber(stats.totalDownloads);
+    document.getElementById('dashTotalCategories').textContent = stats.totalCategories;
+    document.getElementById('dashTodayDownloads').textContent = stats.todayDownloads;
+    await this.loadRecentActivity();
+}
 
-        // Load recent activity
-        this.loadRecentActivity();
-    }
 
     // Load recent activity with real data
     loadRecentActivity() {
@@ -431,38 +407,61 @@ class AdminPanel {
     }
 
     // Handle add download form submission
-    handleAddDownload(e) {
+    // Ajout de téléchargement avec image et Firestore
+async handleAddDownload(e) {
         e.preventDefault();
-        
-        const formData = new FormData(e.target);
-        const downloadData = {
-            name: formData.get('name') || document.getElementById('downloadName').value,
-            categoryId: document.getElementById('downloadCategory').value,
-            description: document.getElementById('downloadDescription').value,
-            url: document.getElementById('downloadUrl').value,
-            version: document.getElementById('downloadVersion').value,
-            size: document.getElementById('downloadSize').value,
-            image: this.currentImageData,
-            instructions: document.getElementById('downloadInstructions').value
-        };
-        
-        // Validate required fields
-        if (!downloadData.name || !downloadData.categoryId || !downloadData.description || !downloadData.url) {
-            this.showAlert('Veuillez remplir tous les champs obligatoires.', 'danger');
-            return;
-        }
-        
-        // Add download
-        const newDownload = window.dataStorage.addDownload(downloadData);
-        if (newDownload) {
-            this.showAlert('Téléchargement ajouté avec succès !', 'success');
-            this.closeModal('addDownloadModal');
-            this.loadDownloadsManagement();
-            this.loadDashboard(); // Update stats
-            e.target.reset();
-            this.currentImageData = null;
-        } else {
-            this.showAlert('Erreur lors de l\'ajout du téléchargement.', 'danger');
+
+    // Récupération des valeurs du formulaire
+    const name = document.getElementById('downloadName').value.trim();
+    const categoryId = document.getElementById('downloadCategory').value;
+    const description = document.getElementById('downloadDescription').value.trim();
+    const url = document.getElementById('downloadUrl').value.trim();
+    const version = document.getElementById('downloadVersion').value.trim();
+    const size = document.getElementById('downloadSize').value.trim();
+    const instructions = document.getElementById('downloadInstructions').value.trim();
+    const file = document.getElementById('downloadImage').files[0];
+
+    // Vérification des champs obligatoires
+    if (!name || !categoryId || !description || !url || !file) {
+        this.showAlert("Veuillez remplir tous les champs obligatoires et choisir une image.", "danger");
+        return;
+    }
+
+    try {
+            // La logique existante est conservée...
+            const downloadData = {
+                name: document.getElementById('downloadName').value.trim(),
+                categoryId: document.getElementById('downloadCategory').value,
+                description: document.getElementById('downloadDescription').value.trim(),
+                url: document.getElementById('downloadUrl').value.trim(),
+                version: document.getElementById('downloadVersion').value.trim(),
+                size: document.getElementById('downloadSize').value.trim(),
+                instructions: document.getElementById('downloadInstructions').value.trim(),
+                image: document.getElementById('downloadImage').files[0], // Le fichier brut
+                downloads: 0,
+                dateAdded: new Date().toISOString()
+            };
+            
+            if (!downloadData.name || !downloadData.categoryId || !downloadData.url) {
+                this.showAlert("Veuillez remplir tous les champs obligatoires.", "danger");
+                return;
+            }
+
+            const newDownload = await window.dataStorage.addDownload(downloadData);
+
+            if (newDownload) {
+                this.showAlert("Téléchargement ajouté avec succès !", "success");
+                this.closeModal("addDownloadModal");
+                e.target.reset();
+                this.loadDownloadsManagement();
+                this.loadDashboard();
+            } else {
+                throw new Error("L'ajout à la base de données a échoué.");
+            }
+
+        } catch (error) {
+            console.error("Erreur lors de l'ajout :", error);
+            this.showAlert(`Erreur : ${error.message}`, "danger");
         }
     }
 
@@ -487,10 +486,12 @@ class AdminPanel {
     }
 
     // Handle edit download form submission
-    handleEditDownload(e) {
+     async handleEditDownload(e) {
         e.preventDefault();
         
         const id = document.getElementById('editDownloadId').value;
+        const imageFile = document.getElementById('editDownloadImage').files[0];
+
         const downloadData = {
             name: document.getElementById('editDownloadName').value,
             categoryId: document.getElementById('editDownloadCategory').value,
@@ -498,26 +499,27 @@ class AdminPanel {
             url: document.getElementById('editDownloadUrl').value,
             version: document.getElementById('editDownloadVersion').value,
             size: document.getElementById('editDownloadSize').value,
-            instructions: document.getElementById('editDownloadInstructions').value
+            instructions: document.getElementById('editDownloadInstructions').value,
         };
-        
-        // Add new image if uploaded
-        if (this.currentEditImageData) {
-            downloadData.image = this.currentEditImageData;
+
+        // Ajoute la nouvelle image seulement si une a été sélectionnée
+        if (imageFile) {
+            downloadData.image = imageFile;
         }
-        
-        // Update download
-        const updatedDownload = window.dataStorage.updateDownload(id, downloadData);
-        if (updatedDownload) {
-            this.showAlert('Téléchargement mis à jour avec succès !', 'success');
-            this.closeModal('editDownloadModal');
-            this.loadDownloadsManagement();
-            this.currentEditImageData = null;
-        } else {
-            this.showAlert('Erreur lors de la mise à jour du téléchargement.', 'danger');
+
+        try {
+            const updatedDownload = await window.dataStorage.updateDownload(id, downloadData);
+            if (updatedDownload) {
+                this.showAlert('Téléchargement mis à jour avec succès !', 'success');
+                this.closeModal('editDownloadModal');
+                this.loadDownloadsManagement();
+            } else {
+                throw new Error("La mise à jour a échoué.");
+            }
+        } catch(error) {
+            this.showAlert(`Erreur lors de la mise à jour : ${error.message}`, 'danger');
         }
     }
-
     // Delete download
     deleteDownload(id) {
         const download = window.dataStorage.getDownloadById(id);
@@ -792,13 +794,5 @@ class AdminPanel {
 // Initialize admin panel when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.adminPanel = new AdminPanel();
-});
-        input.click();
-    
-
-
-// Initialize admin panel when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    window.adminPanel = new AdminPanel();
-    window.adminPanel.fetchCategories(); // Initial fetch of categories
+    window.adminPanel.populateCategoriesSelect(); // Initial fetch of categories
 });
