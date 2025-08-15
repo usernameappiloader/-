@@ -72,7 +72,6 @@ class AdminPanel {
             case 'dashboard': await this.loadDashboard(); break;
             case 'downloads': await this.loadDownloadsManagement(); break;
             case 'categories': await this.loadCategoriesManagement(); break;
-            case 'statistics': await this.loadStatistics(); break;
         }
     }
 
@@ -109,6 +108,7 @@ class AdminPanel {
         }
     }
 
+    // CORRECTION : Passer l'ID comme une chaîne de caractères avec des apostrophes
     createDownloadRow(download) {
         const tr = document.createElement('tr');
         const imageHtml = download.image ? `<img src="${download.image}" alt="${download.name}" class="download-image">` : `<div class="download-image-placeholder"><i class="fas fa-image"></i></div>`;
@@ -137,6 +137,7 @@ class AdminPanel {
         }
     }
 
+    // CORRECTION : Passer l'ID comme une chaîne de caractères avec des apostrophes
     createCategoryManagementCard(category) {
         const col = document.createElement('div');
         col.className = 'col-lg-4 col-md-6 mb-4';
@@ -151,10 +152,6 @@ class AdminPanel {
             </div>
         `;
         return col;
-    }
-
-    async loadStatistics() {
-        console.log("Chargement des statistiques...");
     }
 
     async populateCategoriesSelect() {
@@ -204,9 +201,9 @@ class AdminPanel {
     async editDownload(id) {
         const download = await window.dataStorage.getDownloadById(id);
         if (download) {
+            await this.populateCategoriesSelect();
             document.getElementById('editDownloadId').value = download.id;
             document.getElementById('editDownloadName').value = download.name;
-            await this.populateCategoriesSelect(); // S'assurer que les catégories sont chargées
             document.getElementById('editDownloadCategory').value = download.categoryId;
             document.getElementById('editDownloadDescription').value = download.description;
             document.getElementById('editDownloadUrl').value = download.url;
@@ -278,7 +275,7 @@ class AdminPanel {
         }
     }
 
-    // Fonctions utilitaires
+    // Fonctions utilitaires (une seule version propre)
     showAlert(message, type) {
         const container = document.querySelector('.content-section:not(.d-none)');
         if (container) {
@@ -286,9 +283,13 @@ class AdminPanel {
             alert.className = `alert alert-${type} alert-dismissible fade show`;
             alert.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
             container.insertBefore(alert, container.firstChild);
-            setTimeout(() => bootstrap.Alert.getOrCreateInstance(alert).close(), 5000);
+            setTimeout(() => {
+                const alertInstance = bootstrap.Alert.getInstance(alert);
+                if (alertInstance) alertInstance.close();
+            }, 5000);
         }
     }
+    
     closeModal(modalId) {
         const modalElement = document.getElementById(modalId);
         if (modalElement) {
@@ -298,8 +299,11 @@ class AdminPanel {
             }
         }
     }
+
     formatNumber(num) { return String(num || 0); }
+
     formatDate(dateString) { return new Date(dateString).toLocaleDateString('fr-FR'); }
+
     formatTimeAgo(dateString) { return new Date(dateString).toLocaleTimeString('fr-FR'); }
 }
 
