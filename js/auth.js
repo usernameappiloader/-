@@ -132,9 +132,12 @@ class AuthManager {
 
     // Save credentials for remember me
     saveCredentials(email, password) {
+        // ATTENTION : Le stockage du mot de passe dans localStorage n'est pas sécurisé.
+        // Pour une application en production, utilisez un système d'authentification
+        // comme Firebase Auth pour gérer les mots de passe de manière sécurisée.
         const credentials = {
             email: email,
-            password: btoa(password), // Basic encoding (not secure for production)
+            password: btoa(password), // Encodage simple, NON SÉCURISÉ pour la production
             saved: true
         };
         localStorage.setItem('downloadHub_credentials', JSON.stringify(credentials));
