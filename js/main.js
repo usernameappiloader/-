@@ -47,7 +47,7 @@ class DownloadHub {
             });
         }
     }
-
+    
     createCategoryCard(category) {
         const col = document.createElement('div');
         col.className = 'col-lg-4 col-md-6 mb-4';
@@ -163,6 +163,32 @@ class DownloadHub {
     formatDate(dateString) { return new Date(dateString).toLocaleDateString('fr-FR'); }
 }
 
+// L'initialisation se fait APRÈS la définition de la classe
 document.addEventListener('DOMContentLoaded', () => {
     window.downloadHub = new DownloadHub();
+    
+    const lastSeen = localStorage.getItem('welcomeModalLastSeen');
+    if (!lastSeen || (new Date().getTime() - lastSeen > 24 * 60 * 60 * 1000)) {
+        const welcomeModal = new bootstrap.Modal(document.getElementById('welcomeModal'));
+        const confirmBtn = document.getElementById('confirmWelcomeBtn');
+        let countdown = 3;
+
+        const interval = setInterval(() => {
+            countdown--;
+            if (countdown > 0) {
+                confirmBtn.textContent = `Veuillez patienter ${countdown}s...`;
+            } else {
+                clearInterval(interval);
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = "J'ai compris !";
+            }
+        }, 1000);
+
+        confirmBtn.addEventListener('click', () => {
+            localStorage.setItem('welcomeModalLastSeen', new Date().getTime());
+            welcomeModal.hide();
+        });
+        
+        welcomeModal.show();
+    }
 });
