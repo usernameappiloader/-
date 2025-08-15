@@ -8,11 +8,9 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
     <link href="css/responsive.css" rel="stylesheet">
-     <link rel="shortcut icon" href="images/icon.png" type="image/x-icon">
     <link rel="shortcut icon" href="images/icon.png" type="image/x-icon">
 </head>
 <body>
-    <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
         <div class="container">
             <a class="navbar-brand" href="#"><i class="fas fa-download me-2"></i>𝐌𝐑ܮ🩸⃟༑🤖⃟𝐃𝐄𝐕✮⃝𝐓𝐄𝐂𝐇</a>
@@ -21,160 +19,126 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#home">Accueil</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#downloads">Téléchargements</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#categories">Catégories</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link active" href="#home">Accueil</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#downloads">Téléchargements</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#categories">Catégories</a></li>
                 </ul>
-                <a href="login.html" class="btn btn-outline-light">
-                    <i class="fas fa-user-shield me-1"></i>Admin
-                </a>
+                <a href="login.html" class="btn btn-outline-light"><i class="fas fa-user-shield me-1"></i>Admin</a>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Section -->
     <section id="home" class="hero-section">
         <div class="container">
             <div class="row align-items-center min-vh-100">
                 <div class="col-lg-6">
-                    <h1 class="display-4 fw-bold text-white mb-4">
-                        Téléchargez vos Applications Favorites
-                    </h1>
-                    <p class="lead text-white-50 mb-4">
-                        Découvrez une large collection d'applications, logiciels et outils gratuits. 
-                        Téléchargement sécurisé et rapide.
-                    </p>
-                    <a href="#downloads" class="btn btn-light btn-lg">
-                        <i class="fas fa-arrow-down me-2"></i>Voir les Téléchargements
-                    </a>
+                    <h1 class="display-4 fw-bold text-white mb-4">Téléchargez vos Applications Favorites</h1>
+                    <p class="lead text-white-50 mb-4">Découvrez une large collection d'applications, logiciels et outils gratuits. Téléchargement sécurisé et rapide.</p>
+                    <a href="#downloads" class="btn btn-light btn-lg"><i class="fas fa-arrow-down me-2"></i>Voir les Téléchargements</a>
                 </div>
-                <div class="col-lg-6">
-                    <div class="hero-image">
-                        <i class="fas fa-mobile-alt hero-icon"></i>
-                    </div>
+                <div class="col-lg-6 text-center">
+                    <i class="fas fa-mobile-alt hero-icon"></i>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Search and Filter Section -->
     <section class="py-5 bg-light">
         <div class="container">
-            <div class="row">
-                <div class="col-lg-8 mx-auto">
-                    <div class="search-box">
-                        <div class="input-group input-group-lg">
-                            <input type="text" id="searchInput" class="form-control" placeholder="Rechercher une application...">
-                            <button class="btn btn-primary" type="button">
-                                <i class="fas fa-search"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
+            <div class="search-box">
+                <input type="text" id="searchInput" class="form-control form-control-lg" placeholder="Rechercher une application...">
             </div>
         </div>
     </section>
 
-    <!-- Categories Section -->
     <section id="categories" class="py-5">
         <div class="container">
             <h2 class="text-center mb-5">Catégories</h2>
-            <div class="row" id="categoriesContainer">
-                <!-- Categories will be loaded dynamically -->
-            </div>
+            <div class="row" id="categoriesContainer"></div>
         </div>
     </section>
 
-    <!-- Downloads Section -->
     <section id="downloads" class="py-5 bg-light">
         <div class="container">
-            <h2 class="text-center mb-5">Téléchargements Populaires</h2>
+            <h2 class="text-center mb-5">Téléchargements</h2>
             <div class="row mb-4">
-                <div class="col-md-6">
-                    <select id="categoryFilter" class="form-select">
-                        <option value="">Toutes les catégories</option>
-                    </select>
-                </div>
-                <div class="col-md-6">
-                    <select id="sortBy" class="form-select">
-                        <option value="name">Trier par nom</option>
-                        <option value="downloads">Plus téléchargés</option>
-                        <option value="date">Plus récents</option>
-                    </select>
-                </div>
+                <div class="col-md-6"><select id="categoryFilter" class="form-select"></select></div>
+                <div class="col-md-6"><select id="sortBy" class="form-select"></select></div>
             </div>
-            <div class="row" id="downloadsContainer">
-                <!-- Downloads will be loaded dynamically -->
-            </div>
+            <div class="row" id="downloadsContainer"></div>
         </div>
     </section>
 
-    <!-- Stats Section -->
-    <section class="py-5 bg-primary text-white">
-        <div class="container">
-            <div class="row text-center">
-                <div class="col-md-3">
-                    <h3 id="totalApps">0</h3>
-                    <p>Applications</p>
-                </div>
-                <div class="col-md-3">
-                    <h3 id="totalDownloads">0</h3>
-                    <p>Téléchargements</p>
-                </div>
-                <div class="col-md-3">
-                    <h3 id="totalCategories">0</h3>
-                    <p>Catégories</p>
-                </div>
-                <div class="col-md-3">
-                    <h3>100%</h3>
-                    <p>Gratuit</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="bg-dark text-white py-4">
+    <section class="py-5 bg-primary text-white text-center">
         <div class="container">
             <div class="row">
-                <div class="col-md-6">
-                    <h5><i class="fas fa-download me-2"></i>𝐌𝐑ܮ🩸⃟༑🤖⃟𝐃𝐄𝐕✮⃝𝐓𝐄𝐂𝐇</h5>
-                    <p>Votre destination pour les téléchargements et tech gratuits et sécurisés.</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <p>&copy; 2024 𝐌𝐑ܮ🩸⃟༑🤖⃟𝐃𝐄𝐕✮⃝𝐓𝐄𝐂𝐇. Tous droits réservés.</p>
-                </div>
+                <div class="col-md-4"><h3 id="totalApps">0</h3><p>Applications</p></div>
+                <div class="col-md-4"><h3 id="totalDownloads">0</h3><p>Téléchargements</p></div>
+                <div class="col-md-4"><h3 id="totalCategories">0</h3><p>Catégories</p></div>
             </div>
+        </div>
+    </section>
+
+    <footer class="bg-dark text-white py-4">
+        <div class="container text-center">
+            <p>&copy; 2024 𝐌𝐑ܮ🩸⃟༑🤖⃟𝐃𝐄𝐕✮⃝𝐓𝐄𝐂𝐇. Tous droits réservés.</p>
         </div>
     </footer>
 
-    <!-- Download Modal -->
     <div class="modal fade" id="downloadModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Téléchargement</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body" id="modalBody">
-                    <!-- Content will be loaded dynamically -->
-                </div>
+                <div class="modal-header"><h5 class="modal-title">Téléchargement</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body" id="modalBody"></div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                    <a href="#" id="downloadBtn" class="btn btn-primary" target="_blank">
-                        <i class="fas fa-download me-2"></i>Télécharger
-                    </a>
+                    <a href="#" id="downloadBtn" class="btn btn-primary" target="_blank"><i class="fas fa-download me-2"></i>Télécharger</a>
                 </div>
             </div>
         </div>
     </div>
     
+    <div class="modal fade" id="welcomeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-white"><i class="fas fa-info-circle me-2 text-white"></i>Bienvenue sur 𝐌𝐑ܮ🩸⃟༑🤖⃟𝐃𝐄𝐕✮⃝𝐓𝐄𝐂𝐇 !</h5>
+                </div>
+                <div class="modal-body">
+                    <p>Voici quelques consignes pour bien utiliser le site :
+                        📢 BIENVENUE SUR 𝐌𝐑ܮ🩸⃟༑🤖⃟𝐃𝐄𝐕✮⃝𝐓𝐄𝐂𝐇 🚀 <br>
+                                    Ici, tu trouveras : <br>
+                                    ✅ Astuces Tech et tutoriels pratiques <br>
+                                    ✅ Apps premium et outils gratuits <br>
+                                    ✅ Bots WhatsApp et automatisations <br>
+                                    ✅ Bons plans, hacks et nouveautés <br> <br>
+
+                                    📌 RÈGLES DU GROUPE : <br>
+                                    1️⃣ Pas de spam (pubs, liens inutiles, etc.) <br>
+                                    2️⃣ Respect entre membres <br>
+                                    3️⃣ Contenu utile uniquement (pas de messages hors sujet) <br>
+                                    4️⃣ Pas de contenu illégal / dangereux <br>
+                                    5️⃣ Poser ses questions clairement pour obtenir de l’aide rapide <br>
+
+                                    <br>
+
+                                    💬 Astuce : Active la notification silencieuse pour ne rien manquer sans être dérangé.
+                                    📥 Reste connecté, les nouveautés arrivent chaque jour !
+                    </p>
+                    <ul>
+                        <li>Utilisez la barre de <strong>recherche</strong> pour trouver rapidement une application.</li>
+                        <li>Filtrez les résultats par <strong>catégorie</strong> pour affiner votre recherche.</li>
+                        <li>Tous les téléchargements sont <strong>sécurisés et vérifiés</strong>.</li>
+                    </ul>
+                    <p class="text-center text-muted">Veuillez lire les consignes avant de continuer.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary w-100" id="confirmWelcomeBtn" disabled>Veuillez patienter 3s...</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -183,4 +147,3 @@
     <script src="js/main.js"></script>        
 </body>
 </html>
-
