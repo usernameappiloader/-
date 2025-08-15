@@ -1,7 +1,5 @@
-// ===== FIREBASE INITIALIZATION (v9 Syntax) =====
+// ===== FIREBASE INITIALIZATION (CORRIGÉ) =====
 
-// TODO: Remplacez les valeurs ci-dessous par votre propre configuration Firebase
-// Ne jamais stocker de clés réelles dans un dépôt de code public.
 const firebaseConfig = {
    apiKey: "AIzaSyBr2cR7ppjMFFJr3vmygX7rD87vGnOfaAk",
   authDomain: "mr-dev-prime.firebaseapp.com",
@@ -12,14 +10,12 @@ const firebaseConfig = {
 };
 
 // Initialisation de Firebase
-// NOTE: Assurez-vous d'importer les SDK Firebase v9 dans vos fichiers HTML.
 const app = firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const storage = firebase.storage();
+// const storage = firebase.storage(); // <--- SUPPRIMEZ CETTE LIGNE
 
-// Expose les instances Firebase à l'objet global 'window' pour un accès simple dans ce projet.
-// Dans une application plus grande, il serait préférable d'utiliser des modules ES6.
+// Expose les instances Firebase à l'objet global 'window'
 window.db = db;
-window.storage = storage;
+// window.storage = storage; // <--- SUPPRIMEZ CETTE LIGNE AUSSI
 
 console.log("Firebase initialized successfully.");
