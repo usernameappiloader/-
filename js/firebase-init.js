@@ -12,10 +12,8 @@ const firebaseConfig = {
 // Initialisation de Firebase
 const app = firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-// const storage = firebase.storage(); // <--- SUPPRIMEZ CETTE LIGNE
 
-// Expose les instances Firebase à l'objet global 'window'
+// Expose la base de données à l'objet global 'window'
 window.db = db;
-// window.storage = storage; // <--- SUPPRIMEZ CETTE LIGNE AUSSI
 
 console.log("Firebase initialized successfully.");
