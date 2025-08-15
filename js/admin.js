@@ -12,7 +12,7 @@ class AdminPanel {
         this.setupEventListeners();
         this.loadDashboard();
         this.setupFileUpload();
-    this.setupFirebaseImageUpload();
+        this.setupFirebaseImageUpload();
     }
     // Setup Firebase image upload modal
     setupFirebaseImageUpload() {
@@ -104,8 +104,8 @@ class AdminPanel {
         }
 
         // Remplir les catégories à chaque ouverture de modal
-        document.getElementById('addDownloadModal').addEventListener('show.bs.modal', this.populateCategoriesSelect);
-        document.getElementById('editDownloadModal').addEventListener('show.bs.modal', this.populateCategoriesSelect);
+        document.getElementById('addDownloadModal').addEventListener('show.bs.modal', () => this.populateCategoriesSelect());
+        document.getElementById('editDownloadModal').addEventListener('show.bs.modal', () => this.populateCategoriesSelect());
     }
 
     // Handle sidebar navigation
@@ -661,30 +661,22 @@ class AdminPanel {
         });
     }
 
-    // Exemple de récupération des catégories (adaptez selon votre backend/Firebase)
-    fetchCategories() {
-        // Remplacez ceci par votre méthode réelle de récupération
-        // fetch(...).then(res => res.json()).then(data => { categoriesList = data; populateCategoriesSelect(); });
-        // Exemple statique :
-        categoriesList = [
-            { id: 'cat1', name: 'Jeux' },
-            { id: 'cat2', name: 'Utilitaires' },
-            { id: 'cat3', name: 'Productivité' }
-        ];
-        this.populateCategoriesSelect();
-    }
-
-    // Remplit tous les <select data-populate="categories">
+    // Remplit tous les <select data-populate="categories"> avec les vraies catégories
     populateCategoriesSelect() {
+        const categories = window.dataStorage.getCategories();
         const selects = document.querySelectorAll('select[data-populate="categories"]');
         selects.forEach(select => {
+            // Sauvegarde la valeur sélectionnée si elle existe
+            const currentValue = select.value;
             select.innerHTML = '<option value="" disabled selected>Choisir une catégorie</option>';
-            categoriesList.forEach(cat => {
+            categories.forEach(cat => {
                 const option = document.createElement('option');
-                option.value = cat.id || cat.name;
+                option.value = cat.id;
                 option.textContent = cat.name;
                 select.appendChild(option);
             });
+            // Restaure la valeur sélectionnée si possible
+            if (currentValue) select.value = currentValue;
         });
     }
 
@@ -796,6 +788,14 @@ class AdminPanel {
         input.click();
     }
 }
+
+// Initialize admin panel when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    window.adminPanel = new AdminPanel();
+});
+        input.click();
+    
+
 
 // Initialize admin panel when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
