@@ -47,17 +47,14 @@ class AdminPanel {
     }
 
     async showSection(sectionName) {
-        // Cacher toutes les sections
         document.querySelectorAll('.content-section').forEach(section => {
             section.classList.add('d-none');
         });
-        // Afficher la bonne section
         const targetSection = document.getElementById(`${sectionName}-section`);
         if (targetSection) {
             targetSection.classList.remove('d-none');
         }
 
-        // Mettre à jour le lien actif dans la barre latérale
         document.querySelectorAll('.sidebar .nav-link').forEach(link => {
             link.classList.remove('active');
         });
@@ -67,7 +64,6 @@ class AdminPanel {
         }
 
         this.currentSection = sectionName;
-        // Charger les données pour la section affichée
         await this.loadSectionData(sectionName);
     }
 
@@ -113,7 +109,6 @@ class AdminPanel {
         }
     }
 
-    // CORRECTION : Passer l'ID comme une chaîne de caractères
     createDownloadRow(download) {
         const tr = document.createElement('tr');
         const imageHtml = download.image ? `<img src="${download.image}" alt="${download.name}" class="download-image">` : `<div class="download-image-placeholder"><i class="fas fa-image"></i></div>`;
@@ -141,8 +136,7 @@ class AdminPanel {
             });
         }
     }
-    
-    // CORRECTION : Passer l'ID comme une chaîne de caractères
+
     createCategoryManagementCard(category) {
         const col = document.createElement('div');
         col.className = 'col-lg-4 col-md-6 mb-4';
@@ -160,7 +154,6 @@ class AdminPanel {
     }
 
     async loadStatistics() {
-        // Cette fonction peut être développée plus tard
         console.log("Chargement des statistiques...");
     }
 
@@ -190,7 +183,7 @@ class AdminPanel {
         const downloadData = {
             name: document.getElementById('downloadName').value.trim(),
             categoryId: selectedOption.value,
-            category: selectedOption.text, // Sauvegarder le nom de la catégorie
+            category: selectedOption.text,
             description: document.getElementById('downloadDescription').value.trim(),
             url: document.getElementById('downloadUrl').value.trim(),
             version: document.getElementById('downloadVersion').value.trim(),
@@ -200,14 +193,12 @@ class AdminPanel {
             dateAdded: new Date().toISOString()
         };
         
-        const newDownload = await window.dataStorage.addDownload(downloadData);
-        if (newDownload) {
-            this.showAlert("Téléchargement ajouté avec succès !", "success");
-            this.closeModal("addDownloadModal");
-            e.target.reset();
-            await this.loadDownloadsManagement();
-            await this.loadDashboard();
-        }
+        await window.dataStorage.addDownload(downloadData);
+        this.showAlert("Téléchargement ajouté avec succès !", "success");
+        this.closeModal("addDownloadModal");
+        e.target.reset();
+        await this.loadDownloadsManagement();
+        await this.loadDashboard();
     }
 
     async editDownload(id) {
@@ -215,6 +206,7 @@ class AdminPanel {
         if (download) {
             document.getElementById('editDownloadId').value = download.id;
             document.getElementById('editDownloadName').value = download.name;
+            await this.populateCategoriesSelect(); // S'assurer que les catégories sont chargées
             document.getElementById('editDownloadCategory').value = download.categoryId;
             document.getElementById('editDownloadDescription').value = download.description;
             document.getElementById('editDownloadUrl').value = download.url;
@@ -277,9 +269,9 @@ class AdminPanel {
     }
 
     async deleteCategory(id) {
-        if (confirm("ATTENTION : La suppression de cette catégorie entraînera la suppression de tous les téléchargements associés. Êtes-vous sûr ?")) {
+        if (confirm("ATTENTION : La suppression de cette catégorie entraînera la suppression de TOUS les téléchargements associés. Êtes-vous sûr ?")) {
             await window.dataStorage.deleteCategory(id);
-            this.showAlert('Catégorie supprimée avec succès !', 'success');
+            this.showAlert('Catégorie et téléchargements associés supprimés !', 'success');
             await this.loadCategoriesManagement();
             await this.loadDownloadsManagement();
             await this.loadDashboard();
@@ -288,11 +280,13 @@ class AdminPanel {
 
     // Fonctions utilitaires
     showAlert(message, type) {
-        const alertPlaceholder = document.querySelector('.content-section:not(.d-none)');
-        if(alertPlaceholder) {
-            const wrapper = document.createElement('div');
-            wrapper.innerHTML = `<div class="alert alert-${type} alert-dismissible" role="alert">${message}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>`;
-            alertPlaceholder.prepend(wrapper);
+        const container = document.querySelector('.content-section:not(.d-none)');
+        if (container) {
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-dismissible fade show`;
+            alert.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+            container.insertBefore(alert, container.firstChild);
+            setTimeout(() => bootstrap.Alert.getOrCreateInstance(alert).close(), 5000);
         }
     }
     closeModal(modalId) {
