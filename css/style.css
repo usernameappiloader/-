@@ -372,7 +372,11 @@ footer {
 .bg-gradient-primary {
     background: var(--gradient-primary);
 }
-
+/* Changer la couleur du texte des consignes dans la fenêtre de bienvenue */
+#welcomeModal .modal-body .text-muted {
+    color: #ffc107 !important; /* Couleur jaune "warning" */
+    font-weight: bold; /* Mettre le texte en gras pour qu'il ressorte */
+}
 .bg-gradient-secondary {
     background: var(--gradient-secondary);
 }
