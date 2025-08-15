@@ -1,7 +1,7 @@
 // firebase-init.js
 // Remplacez les valeurs ci-dessous par celles de votre projet Firebase
 const firebaseConfig = {
-     apiKey: "AIzaSyBr2cR7ppjMFFJr3vmygX7rD87vGnOfaAk",
+  apiKey: "AIzaSyBr2cR7ppjMFFJr3vmygX7rD87vGnOfaAk",
   authDomain: "mr-dev-prime.firebaseapp.com",
   projectId: "mr-dev-prime",
   storageBucket: "mr-dev-prime.firebasestorage.app",
