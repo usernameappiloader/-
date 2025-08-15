@@ -12,6 +12,33 @@ class AdminPanel {
         this.setupEventListeners();
         this.loadDashboard();
         this.setupFileUpload();
+    this.setupFirebaseImageUpload();
+    }
+    // Setup Firebase image upload modal
+    setupFirebaseImageUpload() {
+        const uploadImageForm = document.getElementById('uploadImageForm');
+        if (!uploadImageForm) return;
+        uploadImageForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fileInput = document.getElementById('firebaseImageFile');
+            const nameInput = document.getElementById('firebaseImageName');
+            const statusDiv = document.getElementById('firebaseImageUploadStatus');
+            if (!fileInput.files.length) {
+                statusDiv.textContent = 'Veuillez sélectionner une image.';
+                return;
+            }
+            const file = fileInput.files[0];
+            const fileName = nameInput.value ? nameInput.value : Date.now() + '_' + file.name;
+            statusDiv.textContent = 'Envoi en cours...';
+            try {
+                const storageRef = firebase.storage().ref('images/' + fileName);
+                const snapshot = await storageRef.put(file);
+                const downloadURL = await snapshot.ref.getDownloadURL();
+                statusDiv.innerHTML = `<span class='text-success'>Image uploadée !</span><br>Lien : <a href='${downloadURL}' target='_blank'>${downloadURL}</a>`;
+            } catch (error) {
+                statusDiv.innerHTML = `<span class='text-danger'>Erreur : ${error.message}</span>`;
+            }
+        });
     }
 
     // Check if user is authenticated
