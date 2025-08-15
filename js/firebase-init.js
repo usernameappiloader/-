@@ -1,5 +1,4 @@
-// firebase-init.js
-// Remplacez les valeurs ci-dessous par celles de votre projet Firebase
+// Remplacez les valeurs ci-dessous par votre propre configuration Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyBr2cR7ppjMFFJr3vmygX7rD87vGnOfaAk",
   authDomain: "mr-dev-prime.firebaseapp.com",
@@ -7,9 +6,12 @@ const firebaseConfig = {
   storageBucket: "mr-dev-prime.firebasestorage.app",
   messagingSenderId: "995289422831",
   appId: "1:995289422831:web:5bc5b92b1446c7078ef41a",
+  measurementId: "G-7ZXCBWXN7Q"
 };
 
-// Initialisation Firebase
+// Initialisation de Firebase
 firebase.initializeApp(firebaseConfig);
-const firestore = firebase.firestore();
-const storage = firebase.storage();
+const db = firebase.firestore();
+
+// Exportez db pour l'utiliser dans d'autres fichiers
+window.db = db;
