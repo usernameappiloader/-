@@ -102,6 +102,10 @@ class AdminPanel {
         if (editDownloadImage) {
             editDownloadImage.addEventListener('change', (e) => this.handleImageUpload(e, 'editPreview'));
         }
+
+        // Remplir les catégories à chaque ouverture de modal
+        document.getElementById('addDownloadModal').addEventListener('show.bs.modal', this.populateCategoriesSelect);
+        document.getElementById('editDownloadModal').addEventListener('show.bs.modal', this.populateCategoriesSelect);
     }
 
     // Handle sidebar navigation
@@ -657,6 +661,33 @@ class AdminPanel {
         });
     }
 
+    // Exemple de récupération des catégories (adaptez selon votre backend/Firebase)
+    fetchCategories() {
+        // Remplacez ceci par votre méthode réelle de récupération
+        // fetch(...).then(res => res.json()).then(data => { categoriesList = data; populateCategoriesSelect(); });
+        // Exemple statique :
+        categoriesList = [
+            { id: 'cat1', name: 'Jeux' },
+            { id: 'cat2', name: 'Utilitaires' },
+            { id: 'cat3', name: 'Productivité' }
+        ];
+        this.populateCategoriesSelect();
+    }
+
+    // Remplit tous les <select data-populate="categories">
+    populateCategoriesSelect() {
+        const selects = document.querySelectorAll('select[data-populate="categories"]');
+        selects.forEach(select => {
+            select.innerHTML = '<option value="" disabled selected>Choisir une catégorie</option>';
+            categoriesList.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat.id || cat.name;
+                option.textContent = cat.name;
+                select.appendChild(option);
+            });
+        });
+    }
+
     // Utility functions
     formatNumber(num) {
         if (num >= 1000000) {
@@ -769,4 +800,5 @@ class AdminPanel {
 // Initialize admin panel when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.adminPanel = new AdminPanel();
+    window.adminPanel.fetchCategories(); // Initial fetch of categories
 });
