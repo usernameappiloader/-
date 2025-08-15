@@ -7,22 +7,14 @@ class AdminPanel {
     }
 
     // Initialize admin panel
-    init() {
+    async init() { // Ajout de async
         this.checkAuthentication();
         this.setupEventListeners();
-        this.loadDashboard();
+        await this.loadDashboard(); // Ajout de await
         this.setupFileUpload();
-        // La fonction setupFirebaseImageUpload a été supprimée car elle n'est plus utile.
     }
 
-    // --- FONCTION SUPPRIMÉE ---
-    // setupFirebaseImageUpload() a été retirée.
-
-    // ... (le reste du fichier reste identique, car il envoie déjà le fichier
-    // à firestore-storage.js qui s'occupe maintenant de la conversion)
-    
-    // Check if user is authenticated
-    checkAuthentication() {
+     checkAuthentication() {
         if (!window.authManager || !window.authManager.isAuthenticated()) {
             window.location.href = 'login.html';
             return;
@@ -37,57 +29,21 @@ class AdminPanel {
         }
     }
 
+
     // Setup event listeners
     setupEventListeners() {
-        // Sidebar navigation
         document.querySelectorAll('.sidebar .nav-link').forEach(link => {
             link.addEventListener('click', (e) => this.handleNavigation(e));
         });
 
-        // Add download form
-        const addDownloadForm = document.getElementById('addDownloadForm');
-        if (addDownloadForm) {
-            addDownloadForm.addEventListener('submit', (e) => this.handleAddDownload(e));
-        }
-
-        // Edit download form
-        const editDownloadForm = document.getElementById('editDownloadForm');
-        if (editDownloadForm) {
-            editDownloadForm.addEventListener('submit', (e) => this.handleEditDownload(e));
-        }
-
-        // Add category form
-        const addCategoryForm = document.getElementById('addCategoryForm');
-        if (addCategoryForm) {
-            addCategoryForm.addEventListener('submit', (e) => this.handleAddCategory(e));
-        }
-
-        // Logout button
-        const logoutBtn = document.getElementById('logoutBtn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                window.authManager.logout();
-            });
-        }
-
-        // File input change events
-        const downloadImage = document.getElementById('downloadImage');
-        if (downloadImage) {
-            downloadImage.addEventListener('change', (e) => this.handleImageUpload(e, 'preview'));
-        }
-
-        const editDownloadImage = document.getElementById('editDownloadImage');
-        if (editDownloadImage) {
-            editDownloadImage.addEventListener('change', (e) => this.handleImageUpload(e, 'editPreview'));
-        }
-
-        // Remplir les catégories à chaque ouverture de modal
+        document.getElementById('addDownloadForm').addEventListener('submit', (e) => this.handleAddDownload(e));
+        document.getElementById('editDownloadForm').addEventListener('submit', (e) => this.handleEditDownload(e));
+        document.getElementById('addCategoryForm').addEventListener('submit', (e) => this.handleAddCategory(e));
+        
         document.getElementById('addDownloadModal').addEventListener('show.bs.modal', () => this.populateCategoriesSelect());
         document.getElementById('editDownloadModal').addEventListener('show.bs.modal', () => this.populateCategoriesSelect());
     }
 
-    // Handle sidebar navigation
     handleNavigation(e) {
         e.preventDefault();
         const section = e.currentTarget.getAttribute('data-section');
@@ -96,118 +52,72 @@ class AdminPanel {
         }
     }
 
-    // Show specific section
     showSection(sectionName) {
-        // Hide all sections
         document.querySelectorAll('.content-section').forEach(section => {
             section.classList.add('d-none');
         });
 
-        // Show selected section
         const targetSection = document.getElementById(`${sectionName}-section`);
         if (targetSection) {
             targetSection.classList.remove('d-none');
         }
 
-        // Update active nav link
         document.querySelectorAll('.sidebar .nav-link').forEach(link => {
             link.classList.remove('active');
         });
         document.querySelector(`[data-section="${sectionName}"]`).classList.add('active');
 
-        // Load section data
         this.currentSection = sectionName;
         this.loadSectionData(sectionName);
     }
 
     // Load data for specific section
-    loadSectionData(section) {
+    async loadSectionData(section) { // Ajout de async
         switch (section) {
             case 'dashboard':
-                this.loadDashboard();
+                await this.loadDashboard(); // Ajout de await
                 break;
             case 'downloads':
-                this.loadDownloadsManagement();
+                await this.loadDownloadsManagement(); // Ajout de await
                 break;
             case 'categories':
-                this.loadCategoriesManagement();
+                await this.loadCategoriesManagement(); // Ajout de await
                 break;
             case 'statistics':
-                this.loadStatistics();
+                await this.loadStatistics(); // Ajout de await
                 break;
         }
     }
 
     // Load dashboard data
-    async loadDashboard() {
-    const stats = await window.dataStorage.getStats();
-    document.getElementById('dashTotalApps').textContent = stats.totalApps;
-    document.getElementById('dashTotalDownloads').textContent = this.formatNumber(stats.totalDownloads);
-    document.getElementById('dashTotalCategories').textContent = stats.totalCategories;
-    document.getElementById('dashTodayDownloads').textContent = stats.todayDownloads;
-    await this.loadRecentActivity();
-}
+    async loadDashboard() { // Ajout de async
+        const stats = await window.dataStorage.getStats(); // Ajout de await
+        if (stats) {
+            document.getElementById('dashTotalApps').textContent = stats.totalApps;
+            document.getElementById('dashTotalDownloads').textContent = this.formatNumber(stats.totalDownloads);
+            document.getElementById('dashTotalCategories').textContent = stats.totalCategories;
+            document.getElementById('dashTodayDownloads').textContent = stats.todayDownloads;
+        }
+        await this.loadRecentActivity(); // Ajout de await
+    }
 
-
-    // Load recent activity with real data
-    loadRecentActivity() {
-        const activities = window.dataStorage.getRecentActivity();
+    // Load recent activity
+    async loadRecentActivity() { // Ajout de async
+        const activities = await window.dataStorage.getRecentActivity(); // Ajout de await
         const container = document.getElementById('recentActivity');
         
-        if (container) {
+        if (container && Array.isArray(activities)) {
             container.innerHTML = '';
-            
             if (activities.length === 0) {
                 container.innerHTML = '<p class="text-muted">Aucune activité récente</p>';
                 return;
             }
-
             activities.slice(0, 10).forEach(activity => {
-                const activityElement = this.createActivityElement(activity);
-                container.appendChild(activityElement);
+                container.appendChild(this.createActivityElement(activity));
             });
-
-            // Add real-time stats summary
-            this.addActivitySummary(activities, container);
         }
     }
-
-    // Add activity summary with real analytics
-    addActivitySummary(activities, container) {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        
-        const todayActivities = activities.filter(activity => 
-            new Date(activity.time) >= today
-        );
-        
-        const downloadCount = todayActivities.filter(a => a.type === 'download').length;
-        const uploadCount = todayActivities.filter(a => a.type === 'upload').length;
-        const updateCount = todayActivities.filter(a => a.type === 'update').length;
-        
-        const summaryDiv = document.createElement('div');
-        summaryDiv.className = 'activity-summary mt-3 p-3 bg-light rounded';
-        summaryDiv.innerHTML = `
-            <h6>Résumé d'aujourd'hui</h6>
-            <div class="row text-center">
-                <div class="col-4">
-                    <strong class="text-success">${downloadCount}</strong><br>
-                    <small>Téléchargements</small>
-                </div>
-                <div class="col-4">
-                    <strong class="text-primary">${uploadCount}</strong><br>
-                    <small>Ajouts</small>
-                </div>
-                <div class="col-4">
-                    <strong class="text-warning">${updateCount}</strong><br>
-                    <small>Mises à jour</small>
-                </div>
-            </div>
-        `;
-        container.appendChild(summaryDiv);
-    }
-
-    // Create activity element with enhanced info
+    
     createActivityElement(activity) {
         const div = document.createElement('div');
         div.className = 'activity-item d-flex align-items-center p-2 border-bottom';
@@ -239,25 +149,20 @@ class AdminPanel {
     }
 
     // Load downloads management
-    loadDownloadsManagement() {
-        const downloads = window.dataStorage.getDownloads();
+     async loadDownloadsManagement() { // Ajout de async
+        const downloads = await window.dataStorage.getDownloads(); // Ajout de await
         const tableBody = document.getElementById('downloadsTable');
         
-        if (tableBody) {
+        if (tableBody && Array.isArray(downloads)) {
             tableBody.innerHTML = '';
-            
             downloads.forEach(download => {
-                const row = this.createDownloadRow(download);
-                tableBody.appendChild(row);
+                tableBody.appendChild(this.createDownloadRow(download));
             });
         }
-
-        // Load categories for dropdowns
-        this.loadCategoryOptions();
+        await this.populateCategoriesSelect(); // Ajout de await
     }
-
     // Create download table row
-    createDownloadRow(download) {
+     createDownloadRow(download) {
         const tr = document.createElement('tr');
         
         const imageHtml = download.image ? 
@@ -287,16 +192,15 @@ class AdminPanel {
     }
 
     // Load categories management
-    loadCategoriesManagement() {
-        const categories = window.dataStorage.getCategories();
+    // Load categories management
+    async loadCategoriesManagement() { // Ajout de async
+        const categories = await window.dataStorage.getCategories(); // Ajout de await
         const container = document.getElementById('categoriesGrid');
         
-        if (container) {
+        if (container && Array.isArray(categories)) {
             container.innerHTML = '';
-            
             categories.forEach(category => {
-                const categoryCard = this.createCategoryManagementCard(category);
-                container.appendChild(categoryCard);
+                container.appendChild(this.createCategoryManagementCard(category));
             });
         }
     }
@@ -383,6 +287,25 @@ class AdminPanel {
                     <div class="stats-item-value">${this.formatNumber(totalDownloads)}</div>
                 `;
                 container.appendChild(item);
+            });
+        }
+    }
+
+     async populateCategoriesSelect() { // Ajout de async
+        const categories = await window.dataStorage.getCategories(); // Ajout de await
+        const selects = document.querySelectorAll('select[data-populate="categories"]');
+        
+        if (Array.isArray(categories)) {
+            selects.forEach(select => {
+                const currentValue = select.value;
+                select.innerHTML = '<option value="" disabled>Choisir une catégorie</option>';
+                categories.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.id;
+                    option.textContent = cat.name;
+                    select.appendChild(option);
+                });
+                if(currentValue) select.value = currentValue;
             });
         }
     }
@@ -794,5 +717,4 @@ async handleAddDownload(e) {
 // Initialize admin panel when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.adminPanel = new AdminPanel();
-    window.adminPanel.populateCategoriesSelect(); // Initial fetch of categories
 });
