@@ -1,40 +1,39 @@
 // ===== FIREBASE DATA STORAGE MANAGEMENT =====
-// Utilise la Realtime Database de Firebase pour toutes les opérations
+// Utilise Firestore pour toutes les opérations
 class FirebaseStorage {
     constructor() {
-        this.db = firebase.database();
+        this.db = firebase.firestore();
     }
 
     // Récupérer les stats globales
     async getStats() {
-        const snapshot = await this.db.ref('stats').once('value');
-        return snapshot.val() || {};
+        const doc = await this.db.collection('stats').doc('global').get();
+        return doc.exists ? doc.data() : {};
     }
 
     // Récupérer l'activité récente (dernier 100 logs)
     async getRecentActivity(limit = 100) {
-        const snapshot = await this.db.ref('activities').limitToLast(limit).once('value');
-        const data = snapshot.val() || {};
-        // Retourne du plus récent au plus ancien
-        return Object.values(data).reverse();
+        const snapshot = await this.db.collection('activities').orderBy('timestamp', 'desc').limit(limit).get();
+        return snapshot.docs.map(doc => doc.data());
     }
 
     // Ajouter une activité
     addActivity(activity) {
-        return this.db.ref('activities').push(activity);
+        // Ajoute un champ timestamp pour le tri
+        return this.db.collection('activities').add({ ...activity, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
     }
 
     // Mettre à jour les stats
     updateStats(stats) {
-        return this.db.ref('stats').set(stats);
+        return this.db.collection('stats').doc('global').set(stats);
     }
 
-    // Exemples d'autres méthodes Firebase (à adapter selon ton usage)
+    // Exemples d'autres méthodes Firestore (à adapter selon ton usage)
     getSettings() {
-        return this.db.ref('settings').once('value').then(s => s.val() || {});
+        return this.db.collection('settings').doc('main').get().then(doc => doc.exists ? doc.data() : {});
     }
     updateSettings(settings) {
-        return this.db.ref('settings').set(settings);
+        return this.db.collection('settings').doc('main').set(settings);
     }
     // ... Ajoute ici d'autres méthodes selon tes besoins ...
 }
