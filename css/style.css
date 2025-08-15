@@ -486,3 +486,41 @@ footer {
             border: none;
             border-radius: 8px;
         }
+
+        /* ... (TOUT VOTRE STYLE EXISTANT) ... */
+
+/* ===== STYLE PERSONNALISÉ POUR LA MODAL DE BIENVENUE ===== */
+#welcomeModal .modal-content {
+    background-image: url('../images/icon.png');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    color: white;
+    overflow: hidden;
+}
+
+#welcomeModal .modal-content::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 1;
+}
+
+#welcomeModal .modal-header,
+#welcomeModal .modal-body,
+#welcomeModal .modal-footer {
+    position: relative;
+    z-index: 2;
+    background: transparent;
+}
+
+#welcomeModal .modal-header,
+#welcomeModal .modal-footer {
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+#confirmWelcomeBtn:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+}
