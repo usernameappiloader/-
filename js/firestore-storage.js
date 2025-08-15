@@ -1,7 +1,4 @@
-// ===== FIRESTORE DATA STORAGE MANAGEMENT =====
-// Nécessite l'initialisation de Firebase dans firebase-init.js
-
-// ===== FIRESTORE DATA STORAGE MANAGEMENT (VERSION FINALE ET COMPLÈTE) =====
+// ===== FIRESTORE DATA STORAGE MANAGEMENT (VERSION FINALE CORRIGÉE) =====
 
 class FirestoreStorage {
     constructor() {
@@ -87,15 +84,14 @@ class FirestoreStorage {
         return true;
     }
 
-    // --- Activités (FONCTION MANQUANTE) ---
+    // --- Activités ---
     async getRecentActivity() {
-        const snapshot = await this.db.collection('activities').orderBy('time', 'desc').limit(100).get();
+        const snapshot = await this.db.collection('activities').orderBy('time', 'desc').limit(10).get();
         return snapshot.docs.map(doc => doc.data());
     }
 
     async addActivity(type, message, downloadId = null, userInfo = null) {
         const activity = {
-            id: Date.now(),
             type,
             message,
             time: new Date().toISOString(),
@@ -103,27 +99,30 @@ class FirestoreStorage {
             userInfo: userInfo || { ip: 'Unknown', userAgent: navigator.userAgent }
         };
         await this.db.collection('activities').add(activity);
-        return activity;
     }
 
-    // --- Statistiques (FONCTION MANQUANTE) ---
+    // --- Statistiques ---
     async getStats() {
-        const downloads = await this.getDownloads();
-        const categories = await this.getCategories();
+        const downloadsSnapshot = await this.db.collection('downloads').get();
+        const categoriesSnapshot = await this.db.collection('categories').get();
+        
+        const downloads = downloadsSnapshot.docs.map(doc => doc.data());
+        const totalDownloadsCount = downloads.reduce((sum, d) => sum + (d.downloads || 0), 0);
+        
+        // Pour les téléchargements d'aujourd'hui, une approche simple sans query complexe
         const activities = await this.getRecentActivity();
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const todayDownloads = activities.filter(a => a.type === 'download' && new Date(a.time) >= today).length;
+        const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+        const todayDownloads = activities.filter(a => a.type === 'download' && a.time.startsWith(today)).length;
+
         return {
-            totalDownloads: downloads.reduce((sum, d) => sum + (d.downloads || 0), 0),
+            totalDownloads: totalDownloadsCount,
             todayDownloads,
-            totalApps: downloads.length,
-            totalCategories: categories.length,
-            lastUpdated: new Date().toISOString()
+            totalApps: downloadsSnapshot.size,
+            totalCategories: categoriesSnapshot.size,
         };
     }
 
-    // --- Paramètres ---
+    // --- Paramètres (Settings) ---
     async getSettings() {
         const doc = await this.db.collection('settings').doc('main').get();
         return doc.exists ? doc.data() : {};
@@ -135,5 +134,5 @@ class FirestoreStorage {
     }
 }
 
-// Initialise l'instance globale
+// Initialise l'instance globale une seule fois
 window.dataStorage = new FirestoreStorage();
