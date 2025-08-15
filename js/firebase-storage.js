@@ -1,42 +1,160 @@
-// ===== FIREBASE DATA STORAGE MANAGEMENT =====
-// Utilise Firestore pour toutes les opérations
-class FirebaseStorage {
+// ===== FIRESTORE DATA STORAGE MANAGEMENT =====
+// Nécessite l'initialisation de Firebase dans firebase-init.js
+
+class FirestoreStorage {
     constructor() {
-        this.db = firebase.firestore();
+        this.db = window.db;
     }
 
-    // Récupérer les stats globales
-    async getStats() {
-        const doc = await this.db.collection('stats').doc('global').get();
-        return doc.exists ? doc.data() : {};
+    // Catégories
+    async getCategories() {
+        const snapshot = await this.db.collection('categories').get();
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     }
 
-    // Récupérer l'activité récente (dernier 100 logs)
-    async getRecentActivity(limit = 100) {
-        const snapshot = await this.db.collection('activities').orderBy('timestamp', 'desc').limit(limit).get();
+    async getCategoryById(id) {
+        const doc = await this.db.collection('categories').doc(id.toString()).get();
+        return doc.exists ? { id: doc.id, ...doc.data() } : null;
+    }
+
+    async addCategory(categoryData) {
+        const ref = this.db.collection('categories').doc();
+        await ref.set(categoryData);
+        return { id: ref.id, ...categoryData };
+    }
+
+    async updateCategory(id, categoryData) {
+        await this.db.collection('categories').doc(id.toString()).update(categoryData);
+        return this.getCategoryById(id);
+    }
+
+    async deleteCategory(id) {
+        await this.db.collection('categories').doc(id.toString()).delete();
+        // Supprimer aussi les downloads de cette catégorie
+        const downloads = await this.getDownloads();
+        const batch = this.db.batch();
+        downloads.filter(d => d.categoryId == id).forEach(d => {
+            batch.delete(this.db.collection('downloads').doc(d.id.toString()));
+        });
+        await batch.commit();
+        return true;
+    }
+
+    // Downloads
+    async getDownloads() {
+        const snapshot = await this.db.collection('downloads').get();
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    }
+
+    async getDownloadById(id) {
+        const doc = await this.db.collection('downloads').doc(id.toString()).get();
+        return doc.exists ? { id: doc.id, ...doc.data() } : null;
+    }
+
+    async addDownload(downloadData) {
+        const ref = this.db.collection('downloads').doc();
+        await ref.set(downloadData);
+        await this.addActivity('upload', `${downloadData.name} a été ajouté au catalogue`, ref.id);
+        return { id: ref.id, ...downloadData };
+    }
+
+    async updateDownload(id, downloadData) {
+        await this.db.collection('downloads').doc(id.toString()).update(downloadData);
+        await this.addActivity('update', `${downloadData.name} a été mis à jour`, id);
+        return this.getDownloadById(id);
+    }
+
+    async deleteDownload(id) {
+        const download = await this.getDownloadById(id);
+        await this.db.collection('downloads').doc(id.toString()).delete();
+        await this.addActivity('delete', `${download.name} a été supprimé du catalogue`, id);
+        return true;
+    }
+
+    // Activités
+    async getRecentActivity() {
+        const snapshot = await this.db.collection('activities').orderBy('time', 'desc').limit(100).get();
         return snapshot.docs.map(doc => doc.data());
     }
 
-    // Ajouter une activité
-    addActivity(activity) {
-        // Ajoute un champ timestamp pour le tri
-        return this.db.collection('activities').add({ ...activity, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+    async addActivity(type, message, downloadId = null, userInfo = null) {
+        const activity = {
+            id: Date.now(),
+            type,
+            message,
+            time: new Date().toISOString(),
+            downloadId,
+            userInfo: userInfo || {
+                ip: 'Unknown',
+                userAgent: navigator.userAgent.substring(0, 50) + '...'
+            }
+        };
+        await this.db.collection('activities').add(activity);
+        return activity;
     }
 
-    // Mettre à jour les stats
-    updateStats(stats) {
-        return this.db.collection('stats').doc('global').set(stats);
+    // Stats (calculées dynamiquement)
+    async getStats() {
+        const downloads = await this.getDownloads();
+        const categories = await this.getCategories();
+        const activities = await this.getRecentActivity();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayDownloads = activities.filter(a => a.type === 'download' && new Date(a.time) >= today).length;
+        return {
+            totalDownloads: downloads.reduce((sum, d) => sum + (d.downloads || 0), 0),
+            todayDownloads,
+            totalApps: downloads.length,
+            totalCategories: categories.length,
+            lastUpdated: new Date().toISOString()
+        };
     }
 
-    // Exemples d'autres méthodes Firestore (à adapter selon ton usage)
-    getSettings() {
-        return this.db.collection('settings').doc('main').get().then(doc => doc.exists ? doc.data() : {});
+    // Settings (stockés dans un doc unique)
+    async getSettings() {
+        const doc = await this.db.collection('settings').doc('main').get();
+        return doc.exists ? doc.data() : {};
     }
-    updateSettings(settings) {
-        return this.db.collection('settings').doc('main').set(settings);
+
+    async updateSettings(newSettings) {
+        await this.db.collection('settings').doc('main').set(newSettings, { merge: true });
+        return this.getSettings();
     }
-    // ... Ajoute ici d'autres méthodes selon tes besoins ...
+
+    // Import/export (optionnel)
+    async exportData() {
+        const [categories, downloads, stats, settings] = await Promise.all([
+            this.getCategories(),
+            this.getDownloads(),
+            this.getStats(),
+            this.getSettings()
+        ]);
+        return JSON.stringify({ categories, downloads, stats, settings, exportDate: new Date().toISOString() }, null, 2);
+    }
+
+    async importData(jsonData) {
+        const data = JSON.parse(jsonData);
+        const batch = this.db.batch();
+        if (data.categories) {
+            data.categories.forEach(cat => {
+                const ref = this.db.collection('categories').doc(cat.id ? cat.id.toString() : undefined);
+                batch.set(ref, cat);
+            });
+        }
+        if (data.downloads) {
+            data.downloads.forEach(dl => {
+                const ref = this.db.collection('downloads').doc(dl.id ? dl.id.toString() : undefined);
+                batch.set(ref, dl);
+            });
+        }
+        if (data.settings) {
+            const ref = this.db.collection('settings').doc('main');
+            batch.set(ref, data.settings);
+        }
+        await batch.commit();
+        return true;
+    }
 }
 
-// Instance globale pour usage dans tes scripts
-window.firebaseStorage = new FirebaseStorage();
+// Remplace l'instance globale
+window.dataStorage = new FirestoreStorage();
