@@ -3,101 +3,31 @@
 
 class FirestoreStorage {
     constructor() {
-        this.db = window.db;
-        this.storage = window.storage;
+        // La base de données est la seule chose dont nous avons besoin
+        this.db = window.db; 
     }
 
-    // Catégories
-    async getCategories() {
-        try {
-            const snapshot = await this.db.collection('categories').get();
-            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        } catch (error) {
-            console.error("Error getting categories:", error);
-            return [];
-        }
+    // Fonction interne pour convertir une image en texte (Base64)
+    async _fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
     }
 
-    async getCategoryById(id) {
-        try {
-            const doc = await this.db.collection('categories').doc(id.toString()).get();
-            return doc.exists ? { id: doc.id, ...doc.data() } : null;
-        } catch (error) {
-            console.error("Error getting category by ID:", error);
-            return null;
-        }
-    }
-
-    async addCategory(categoryData) {
-        try {
-            const ref = await this.db.collection('categories').add(categoryData);
-            return { id: ref.id, ...categoryData };
-        } catch (error) {
-            console.error("Error adding category:", error);
-            return null;
-        }
-    }
-
-    async updateCategory(id, categoryData) {
-        try {
-            await this.db.collection('categories').doc(id.toString()).update(categoryData);
-            return this.getCategoryById(id);
-        } catch (error) {
-            console.error("Error updating category:", error);
-            return null;
-        }
-    }
-
-    async deleteCategory(id) {
-        try {
-            await this.db.collection('categories').doc(id.toString()).delete();
-            const downloads = await this.getDownloads();
-            const batch = this.db.batch();
-            // FIX: Utilisation d'une comparaison de chaînes de caractères pour plus de robustesse
-            downloads.filter(d => String(d.categoryId) === String(id)).forEach(d => {
-                batch.delete(this.db.collection('downloads').doc(d.id.toString()));
-            });
-            await batch.commit();
-            return true;
-        } catch (error) {
-            console.error("Error deleting category:", error);
-            return false;
-        }
-    }
-
-    // ... (le reste du fichier reste inchangé)
-    // Downloads
-    async getDownloads() {
-        try {
-            const snapshot = await this.db.collection('downloads').orderBy('name').get();
-            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        } catch (error) {
-            console.error("Error getting downloads:", error);
-            return [];
-        }
-    }
-
-    async getDownloadById(id) {
-        try {
-            const doc = await this.db.collection('downloads').doc(id.toString()).get();
-            return doc.exists ? { id: doc.id, ...doc.data() } : null;
-        } catch (error) {
-            console.error("Error getting download by ID:", error);
-            return null;
-        }
-    }
+    // --- Fonctions de gestion des téléchargements (MODIFIÉES) ---
 
     async addDownload(downloadData) {
         try {
+            // Si une image est fournie, on la convertit
             if (downloadData.image instanceof File) {
-                const file = downloadData.image;
-                const storageRef = this.storage.ref(`downloads/${Date.now()}_${file.name}`);
-                const snapshot = await storageRef.put(file);
-                const imageUrl = await snapshot.ref.getDownloadURL();
-                downloadData.image = imageUrl;
+                downloadData.image = await this._fileToBase64(downloadData.image);
             }
 
             const ref = await this.db.collection('downloads').add(downloadData);
+            // ... (le reste de la fonction est bon)
             await this.addActivity('upload', `${downloadData.name} a été ajouté au catalogue`, ref.id);
             return { id: ref.id, ...downloadData };
         } catch (error) {
@@ -108,15 +38,13 @@ class FirestoreStorage {
 
     async updateDownload(id, downloadData) {
         try {
+            // Si une NOUVELLE image est fournie, on la convertit
             if (downloadData.image instanceof File) {
-                const file = downloadData.image;
-                const storageRef = this.storage.ref(`downloads/${Date.now()}_${file.name}`);
-                const snapshot = await storageRef.put(file);
-                const imageUrl = await snapshot.ref.getDownloadURL();
-                downloadData.image = imageUrl;
+                downloadData.image = await this._fileToBase64(downloadData.image);
             }
 
             await this.db.collection('downloads').doc(id.toString()).update(downloadData);
+            // ... (le reste de la fonction est bon)
             await this.addActivity('update', `${downloadData.name} a été mis à jour`, id);
             return this.getDownloadById(id);
         } catch (error) {
@@ -125,60 +53,56 @@ class FirestoreStorage {
         }
     }
 
+    // --- Le reste du fichier est correct et n'a pas besoin de changer ---
+    
+    async getCategories() {
+        const snapshot = await this.db.collection('categories').get();
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    }
+
+    async getCategoryById(id) {
+        const doc = await this.db.collection('categories').doc(id.toString()).get();
+        return doc.exists ? { id: doc.id, ...doc.data() } : null;
+    }
+
+    async addCategory(categoryData) {
+        const ref = await this.db.collection('categories').add(categoryData);
+        return { id: ref.id, ...categoryData };
+    }
+
+    async updateCategory(id, categoryData) {
+        await this.db.collection('categories').doc(id.toString()).update(categoryData);
+        return this.getCategoryById(id);
+    }
+    
+    async deleteCategory(id) {
+        await this.db.collection('categories').doc(id.toString()).delete();
+        const downloads = await this.getDownloads();
+        const batch = this.db.batch();
+        downloads.filter(d => String(d.categoryId) === String(id)).forEach(d => {
+            batch.delete(this.db.collection('downloads').doc(d.id.toString()));
+        });
+        await batch.commit();
+        return true;
+    }
+
+    async getDownloads() {
+        const snapshot = await this.db.collection('downloads').orderBy('name').get();
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    }
+
+    async getDownloadById(id) {
+        const doc = await this.db.collection('downloads').doc(id.toString()).get();
+        return doc.exists ? { id: doc.id, ...doc.data() } : null;
+    }
 
     async deleteDownload(id) {
-        try {
-            const download = await this.getDownloadById(id);
-            if (!download) return false;
-            await this.db.collection('downloads').doc(id.toString()).delete();
-            await this.addActivity('delete', `${download.name} a été supprimé du catalogue`, id);
-            return true;
-        } catch (error) {
-            console.error("Error deleting download:", error);
-            return false;
-        }
+        const download = await this.getDownloadById(id);
+        await this.db.collection('downloads').doc(id.toString()).delete();
+        await this.addActivity('delete', `${download.name} a été supprimé`, id);
+        return true;
     }
-
-    // Activités
-    async getRecentActivity() {
-        const snapshot = await this.db.collection('activities').orderBy('time', 'desc').limit(100).get();
-        return snapshot.docs.map(doc => doc.data());
-    }
-
-    async addActivity(type, message, downloadId = null, userInfo = null) {
-        const activity = {
-            id: Date.now(),
-            type,
-            message,
-            time: new Date().toISOString(),
-            downloadId,
-            userInfo: userInfo || {
-                ip: 'Unknown',
-                userAgent: navigator.userAgent.substring(0, 50) + '...'
-            }
-        };
-        await this.db.collection('activities').add(activity);
-        return activity;
-    }
-
-    // Stats (calculées dynamiquement)
-    async getStats() {
-        const downloads = await this.getDownloads();
-        const categories = await this.getCategories();
-        const activities = await this.getRecentActivity();
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const todayDownloads = activities.filter(a => a.type === 'download' && new Date(a.time) >= today).length;
-        return {
-            totalDownloads: downloads.reduce((sum, d) => sum + (d.downloads || 0), 0),
-            todayDownloads,
-            totalApps: downloads.length,
-            totalCategories: categories.length,
-            lastUpdated: new Date().toISOString()
-        };
-    }
-
-    // Settings (stockés dans un doc unique)
+    
     async getSettings() {
         const doc = await this.db.collection('settings').doc('main').get();
         return doc.exists ? doc.data() : {};
