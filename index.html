@@ -86,17 +86,23 @@
     </footer>
 
     <div class="modal fade" id="downloadModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header"><h5 class="modal-title">Téléchargement</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-                <div class="modal-body" id="modalBody"></div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                    <a href="#" id="downloadBtn" class="btn btn-primary" target="_blank"><i class="fas fa-download me-2"></i>Télécharger</a>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="downloadModalTitle">Téléchargement</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalBody">
                 </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                <a href="#" id="downloadBtn" class="btn btn-primary" download>
+                    <i class="fas fa-download me-2"></i>Télécharger
+                </a>
             </div>
         </div>
     </div>
+</div>
     
     <div class="modal fade" id="welcomeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
@@ -130,7 +136,7 @@
                         <li>Filtrez les résultats par <strong>catégorie</strong> pour affiner votre recherche.</li>
                         <li>Tous les téléchargements sont <strong>sécurisés et vérifiés</strong>.</li>
                     </ul>
-                    <p class="text-center text-muted">Veuillez lire les consignes avant de continuer.</p>
+                    <p class="text-center text-muted color-red" style="color: rgba(255, 0, 0, 0.623);">Veuillez lire les consignes avant de continuer.</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary w-100" id="confirmWelcomeBtn" disabled>Veuillez patienter 3s...</button>
