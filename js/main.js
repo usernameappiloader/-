@@ -137,10 +137,22 @@ class DownloadHub {
         const download = await window.dataStorage.getDownloadById(downloadId);
         if (download) {
             const fileName = `${download.name.replace(/\s+/g, '-')}-${download.version || 'file'}.zip`;
-    
+            
+            let instructionsHtml = '';
+            if (download.instructions) {
+                const p = document.createElement('p');
+                p.innerText = download.instructions;
+                instructionsHtml = `
+                    <hr>
+                    <h6><i class="fas fa-info-circle me-2"></i>Instructions :</h6>
+                    <p class="small bg-light p-2 rounded download-instructions">${p.innerHTML.replace(/\n/g, '<br>')}</p>
+                `;
+            }
+
             document.getElementById('downloadModalTitle').textContent = download.name;
             document.getElementById('modalBody').innerHTML = `
                 <p>${download.description}</p>
+                ${instructionsHtml} 
                 <hr>
                 <p class="small text-muted">Fichier : ${fileName}</p>
                 <div id="download-status" class="mt-2"></div>
@@ -149,12 +161,11 @@ class DownloadHub {
             const downloadBtn = document.getElementById('downloadBtn');
             const downloadStatus = document.getElementById('download-status');
     
-            // Remove previous event listeners to avoid multiple triggers
             const newDownloadBtn = downloadBtn.cloneNode(true);
             downloadBtn.parentNode.replaceChild(newDownloadBtn, downloadBtn);
             
             newDownloadBtn.addEventListener('click', async (e) => {
-                e.preventDefault(); // Prevent default link behavior
+                e.preventDefault(); 
     
                 newDownloadBtn.disabled = true;
                 newDownloadBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Téléchargement...';
@@ -179,7 +190,6 @@ class DownloadHub {
                     window.URL.revokeObjectURL(url);
                     document.body.removeChild(a);
     
-                    // Track download after successful start
                     this.trackDownload(download.id);
     
                     downloadStatus.innerHTML = '<span class="text-success">Téléchargement démarré !</span>';
@@ -198,7 +208,6 @@ class DownloadHub {
         }
     }
 
-
     async trackDownload(downloadId) {
         await window.dataStorage.addActivity('download', `Téléchargement de ${downloadId}`);
     }
@@ -216,7 +225,6 @@ class DownloadHub {
     formatDate(dateString) { return new Date(dateString).toLocaleDateString('fr-FR'); }
 }
 
-// L'initialisation se fait APRÈS la définition de la classe
 document.addEventListener('DOMContentLoaded', () => {
     window.downloadHub = new DownloadHub();
     
