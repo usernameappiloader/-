@@ -1,4 +1,4 @@
-// ===== MAIN APPLICATION LOGIC (VERSION FINALE CORRIGÉE) =====
+// ===== MAIN APPLICATION LOGIC (VERSION FINALE CORRIGÉE ET AMÉLIORÉE) =====
 
 class DownloadHub {
     constructor() {
@@ -134,32 +134,69 @@ class DownloadHub {
     }
 
     async handleDownload(downloadId) {
-    const download = await window.dataStorage.getDownloadById(downloadId);
-    if (download) {
-        // Le nom du fichier que l'utilisateur verra (ex: "WhatsApp-Setup.zip")
-        const fileName = `${download.name.replace(/\s+/g, '-')}-${download.version}.zip`;
-
-        // Mettre à jour les éléments de la modale
-        document.getElementById('downloadModalTitle').textContent = download.name;
-        document.getElementById('modalBody').innerHTML = `
-            <p>${download.description}</p>
-            <hr>
-            <p class="small text-muted">Fichier : ${fileName}</p>
-        `;
-        
-        // Configurer le bouton de téléchargement final
-        const downloadBtn = document.getElementById('downloadBtn');
-        downloadBtn.href = download.url; // Le lien de téléchargement direct
-        downloadBtn.setAttribute('download', fileName); // Force le téléchargement avec ce nom de fichier
-        
-        // Attribuer l'action de suivi au clic
-        downloadBtn.onclick = () => this.trackDownload(download.id);
-
-        // Afficher la modale
-        const modal = new bootstrap.Modal(document.getElementById('downloadModal'));
-        modal.show();
+        const download = await window.dataStorage.getDownloadById(downloadId);
+        if (download) {
+            const fileName = `${download.name.replace(/\s+/g, '-')}-${download.version || 'file'}.zip`;
+    
+            document.getElementById('downloadModalTitle').textContent = download.name;
+            document.getElementById('modalBody').innerHTML = `
+                <p>${download.description}</p>
+                <hr>
+                <p class="small text-muted">Fichier : ${fileName}</p>
+                <div id="download-status" class="mt-2"></div>
+            `;
+    
+            const downloadBtn = document.getElementById('downloadBtn');
+            const downloadStatus = document.getElementById('download-status');
+    
+            // Remove previous event listeners to avoid multiple triggers
+            const newDownloadBtn = downloadBtn.cloneNode(true);
+            downloadBtn.parentNode.replaceChild(newDownloadBtn, downloadBtn);
+            
+            newDownloadBtn.addEventListener('click', async (e) => {
+                e.preventDefault(); // Prevent default link behavior
+    
+                newDownloadBtn.disabled = true;
+                newDownloadBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Téléchargement...';
+                downloadStatus.textContent = 'Préparation du téléchargement...';
+    
+                try {
+                    const response = await fetch(download.url);
+    
+                    if (!response.ok) {
+                        throw new Error(`Erreur réseau : ${response.statusText}`);
+                    }
+    
+                    downloadStatus.textContent = 'Téléchargement en cours...';
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = fileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+    
+                    // Track download after successful start
+                    this.trackDownload(download.id);
+    
+                    downloadStatus.innerHTML = '<span class="text-success">Téléchargement démarré !</span>';
+                
+                } catch (error) {
+                    console.error('Erreur de téléchargement:', error);
+                    downloadStatus.innerHTML = `<span class="text-danger">Impossible de télécharger directement. Cliquez ici pour ouvrir la page de téléchargement : <a href="${download.url}" target="_blank">Ouvrir le lien</a></span>`;
+                } finally {
+                     newDownloadBtn.disabled = false;
+                     newDownloadBtn.innerHTML = '<i class="fas fa-download me-2"></i>Télécharger';
+                }
+            });
+    
+            const modal = new bootstrap.Modal(document.getElementById('downloadModal'));
+            modal.show();
+        }
     }
-}
 
 
     async trackDownload(downloadId) {
