@@ -1,4 +1,4 @@
-// ===== MAIN APPLICATION LOGIC (VERSION FINALE CORRIGÉE ET AMÉLIORÉE) =====
+// ===== MAIN APPLICATION LOGIC (VERSION FINALE RENFORCÉE) =====
 
 class DownloadHub {
     constructor() {
@@ -11,12 +11,35 @@ class DownloadHub {
     async init() {
         this.setupEventListeners();
         await this.loadInitialData();
+        
+        const loader = document.getElementById('pageLoader');
+        if (loader) {
+            loader.style.opacity = '0';
+            setTimeout(() => {
+                loader.style.display = 'none';
+            }, 800); // 0.8s, correspond à la transition CSS
+        }
     }
 
     async loadInitialData() {
+        this.showSectionLoader('categoriesContainer');
         await this.loadCategories();
+        this.showSectionLoader('downloadsContainer');
         await this.loadDownloads();
         await this.loadStats();
+    }
+    
+    showSectionLoader(containerId) {
+        const container = document.getElementById(containerId);
+        if (container) {
+            container.innerHTML = `
+                <div class="col-12 loader-container">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Chargement...</span>
+                    </div>
+                </div>
+            `;
+        }
     }
 
     setupEventListeners() {
@@ -28,22 +51,11 @@ class DownloadHub {
     async loadCategories() {
         const categories = await window.dataStorage.getCategories();
         const categoriesContainer = document.getElementById('categoriesContainer');
-        const categoryFilter = document.getElementById('categoryFilter');
-
+        
         if (categoriesContainer && Array.isArray(categories)) {
             categoriesContainer.innerHTML = '';
             categories.forEach(category => {
                 categoriesContainer.appendChild(this.createCategoryCard(category));
-            });
-        }
-
-        if (categoryFilter && Array.isArray(categories)) {
-            categoryFilter.innerHTML = '<option value="">Toutes les catégories</option>';
-            categories.forEach(category => {
-                const option = document.createElement('option');
-                option.value = category.id;
-                option.textContent = `${category.name}`;
-                categoryFilter.appendChild(option);
             });
         }
     }
@@ -70,39 +82,44 @@ class DownloadHub {
         const downloadsContainer = document.getElementById('downloadsContainer');
 
         if (downloadsContainer) {
-            downloadsContainer.innerHTML = downloadsData.length > 0 ? '' : `<div class="col-12 text-center"><p>Aucun téléchargement trouvé.</p></div>`;
-            downloadsData.forEach((download, index) => {
-                downloadsContainer.appendChild(this.createDownloadCard(download, index));
-            });
+            downloadsContainer.innerHTML = '';
+            if (downloadsData.length > 0) {
+                downloadsData.forEach((download, index) => {
+                    downloadsContainer.appendChild(this.createDownloadCard(download, index));
+                });
+            } else {
+                downloadsContainer.innerHTML = `<div class="col-12 text-center"><p>Aucun téléchargement trouvé.</p></div>`;
+            }
         }
     }
 
-  createDownloadCard(download, index) {
-    const col = document.createElement('div');
-    col.className = 'col-lg-4 col-md-6 mb-4';
-    const imageHtml = download.image ? `<img src="${download.image}" alt="${download.name}" loading="lazy">` : `<div class="download-card-image-placeholder"><i class="fas fa-image"></i></div>`;
+    createDownloadCard(download, index) {
+        const col = document.createElement('div');
+        col.className = 'col-lg-4 col-md-6 mb-4';
+        const imageHtml = download.image ? `<img src="${download.image}" alt="${download.name}" loading="lazy">` : `<div class="download-card-image-placeholder"><i class="fas fa-image"></i></div>`;
 
-    col.innerHTML = `
-        <div class="download-card" style="animation-delay: ${index * 0.1}s">
-            <div class="download-card-image">${imageHtml}</div>
-            <div class="download-card-body">
-                <h5 class="download-card-title">${download.name}</h5>
-                <p class="download-card-description">${download.description}</p>
-                <div class="download-card-meta">
-                    <span><i class="fas fa-tag me-1"></i>${download.category}</span>
-                    <span><i class="fas fa-download me-1"></i>${this.formatNumber(download.downloads || 0)}</span>
-                </div>
-                <div class="download-card-footer">
-                    <small class="text-muted"><i class="fas fa-calendar me-1"></i>${this.formatDate(download.dateAdded)}</small>
-                    <button class="btn download-btn" onclick="window.downloadHub.handleDownload('${download.id}')">Télécharger</button>
+        col.innerHTML = `
+            <div class="download-card" style="animation-delay: ${index * 0.1}s">
+                <div class="download-card-image">${imageHtml}</div>
+                <div class="download-card-body">
+                    <h5 class="download-card-title">${download.name}</h5>
+                    <p class="download-card-description">${download.description}</p>
+                    <div class="download-card-meta">
+                        <span><i class="fas fa-tag me-1"></i>${download.category}</span>
+                        <span><i class="fas fa-download me-1"></i>${this.formatNumber(download.downloads || 0)}</span>
+                    </div>
+                    <div class="download-card-footer">
+                        <small class="text-muted"><i class="fas fa-calendar me-1"></i>${this.formatDate(download.dateAdded)}</small>
+                        <button class="btn download-btn" onclick="window.downloadHub.handleDownload('${download.id}')">Télécharger</button>
+                    </div>
                 </div>
             </div>
-        </div>
-    `;
-    return col;
-}
+        `;
+        return col;
+    }
 
     async filterAndDisplayDownloads() {
+        this.showSectionLoader('downloadsContainer');
         let downloads = await window.dataStorage.getDownloads();
 
         if (this.searchQuery) {
@@ -134,7 +151,19 @@ class DownloadHub {
     }
 
     async handleDownload(downloadId) {
+        const modal = new bootstrap.Modal(document.getElementById('downloadModal'));
+        const modalBody = document.getElementById('modalBody');
+        const modalTitle = document.getElementById('downloadModalTitle');
+
+        modalTitle.textContent = "Chargement...";
+        modalBody.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Chargement...</span></div>';
+        modalBody.classList.add('loading');
+        modal.show();
+
         const download = await window.dataStorage.getDownloadById(downloadId);
+        
+        modalBody.classList.remove('loading');
+
         if (download) {
             const fileName = `${download.name.replace(/\s+/g, '-')}-${download.version || 'file'}.zip`;
             
@@ -149,8 +178,8 @@ class DownloadHub {
                 `;
             }
 
-            document.getElementById('downloadModalTitle').textContent = download.name;
-            document.getElementById('modalBody').innerHTML = `
+            modalTitle.textContent = download.name;
+            modalBody.innerHTML = `
                 <p>${download.description}</p>
                 ${instructionsHtml} 
                 <hr>
@@ -168,17 +197,13 @@ class DownloadHub {
                 e.preventDefault(); 
     
                 newDownloadBtn.disabled = true;
-                newDownloadBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Téléchargement...';
-                downloadStatus.textContent = 'Préparation du téléchargement...';
+                newDownloadBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Préparation...';
+                downloadStatus.innerHTML = '<span class="text-info">Tentative de téléchargement direct...</span>';
     
                 try {
                     const response = await fetch(download.url);
+                    if (!response.ok) throw new Error('Téléchargement direct impossible');
     
-                    if (!response.ok) {
-                        throw new Error(`Erreur réseau : ${response.statusText}`);
-                    }
-    
-                    downloadStatus.textContent = 'Téléchargement en cours...';
                     const blob = await response.blob();
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
@@ -191,20 +216,21 @@ class DownloadHub {
                     document.body.removeChild(a);
     
                     this.trackDownload(download.id);
-    
                     downloadStatus.innerHTML = '<span class="text-success">Téléchargement démarré !</span>';
                 
                 } catch (error) {
-                    console.error('Erreur de téléchargement:', error);
-                    downloadStatus.innerHTML = `<span class="text-danger">Impossible de télécharger directement. Cliquez ici pour ouvrir la page de téléchargement : <a href="${download.url}" target="_blank">Ouvrir le lien</a></span>`;
+                    console.error('Erreur de téléchargement direct, redirection:', error);
+                    downloadStatus.innerHTML = `<span class="text-warning">Redirection vers la page de téléchargement...</span>`;
+                    window.open(download.url, '_blank');
+                    this.trackDownload(download.id);
                 } finally {
                      newDownloadBtn.disabled = false;
                      newDownloadBtn.innerHTML = '<i class="fas fa-download me-2"></i>Télécharger';
                 }
             });
-    
-            const modal = new bootstrap.Modal(document.getElementById('downloadModal'));
-            modal.show();
+        } else {
+            modalTitle.textContent = "Erreur";
+            modalBody.innerHTML = "<p>Détails du téléchargement introuvables.</p>";
         }
     }
 
