@@ -1,7 +1,8 @@
-// ===== MAIN APPLICATION LOGIC (VERSION FINALE RENFORCÉE) =====
+// ===== MAIN APPLICATION LOGIC (VERSION FINALE RENFORCÉE ET OPTIMISÉE) =====
 
 class DownloadHub {
     constructor() {
+        this.allDownloads = []; // Stocke tous les téléchargements pour un filtrage rapide
         this.currentCategory = '';
         this.currentSort = 'name';
         this.searchQuery = '';
@@ -24,8 +25,12 @@ class DownloadHub {
     async loadInitialData() {
         this.showSectionLoader('categoriesContainer');
         await this.loadCategories();
+        
         this.showSectionLoader('downloadsContainer');
-        await this.loadDownloads();
+        // On charge les données une seule fois pour des performances optimales
+        this.allDownloads = await window.dataStorage.getDownloads();
+        this.filterAndDisplayDownloads(); // Affiche la liste initiale
+        
         await this.loadStats();
     }
     
@@ -45,17 +50,39 @@ class DownloadHub {
     setupEventListeners() {
         document.getElementById('searchInput').addEventListener('input', (e) => this.handleSearch(e.target.value));
         document.getElementById('categoryFilter').addEventListener('change', (e) => this.handleCategoryFilter(e.target.value));
-        document.getElementById('sortBy').addEventListener('change', (e) => this.handleSort(e.target.value));
+        
+        const sortBySelect = document.getElementById('sortBy');
+        if (sortBySelect) {
+            sortBySelect.innerHTML = `
+                <option value="name">Trier par nom (A-Z)</option>
+                <option value="downloads">Trier par popularité</option>
+                <option value="date">Trier par date d'ajout</option>
+            `;
+            sortBySelect.addEventListener('change', (e) => this.handleSort(e.target.value));
+        }
     }
 
     async loadCategories() {
         const categories = await window.dataStorage.getCategories();
         const categoriesContainer = document.getElementById('categoriesContainer');
+        const categoryFilter = document.getElementById('categoryFilter'); // On récupère le menu déroulant
         
+        // On peuple les cartes de catégories
         if (categoriesContainer && Array.isArray(categories)) {
             categoriesContainer.innerHTML = '';
             categories.forEach(category => {
                 categoriesContainer.appendChild(this.createCategoryCard(category));
+            });
+        }
+
+        // CORRIGÉ : On peuple le menu déroulant du filtre
+        if (categoryFilter && Array.isArray(categories)) {
+            categoryFilter.innerHTML = '<option value="">Filtrer par catégorie</option>'; // Option par défaut
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category.id;
+                option.textContent = category.name;
+                categoryFilter.appendChild(option);
             });
         }
     }
@@ -77,18 +104,18 @@ class DownloadHub {
         return col;
     }
 
-    async loadDownloads(downloads = null) {
-        const downloadsData = downloads || await window.dataStorage.getDownloads();
+    // Cette fonction ne fait plus que l'affichage, la rendant plus simple
+    loadDownloads(downloads) {
         const downloadsContainer = document.getElementById('downloadsContainer');
 
         if (downloadsContainer) {
             downloadsContainer.innerHTML = '';
-            if (downloadsData.length > 0) {
-                downloadsData.forEach((download, index) => {
+            if (downloads.length > 0) {
+                downloads.forEach((download, index) => {
                     downloadsContainer.appendChild(this.createDownloadCard(download, index));
                 });
             } else {
-                downloadsContainer.innerHTML = `<div class="col-12 text-center"><p>Aucun téléchargement trouvé.</p></div>`;
+                downloadsContainer.innerHTML = `<div class="col-12 text-center"><p>Aucun téléchargement correspondant à vos critères.</p></div>`;
             }
         }
     }
@@ -118,19 +145,22 @@ class DownloadHub {
         return col;
     }
 
-    async filterAndDisplayDownloads() {
+    // Cette fonction est maintenant beaucoup plus rapide car elle ne recharge pas les données
+    filterAndDisplayDownloads() {
         this.showSectionLoader('downloadsContainer');
-        let downloads = await window.dataStorage.getDownloads();
+        
+        let filteredDownloads = [...this.allDownloads]; // On travaille sur une copie
 
         if (this.searchQuery) {
-            downloads = downloads.filter(d => d.name.toLowerCase().includes(this.searchQuery) || d.description.toLowerCase().includes(this.searchQuery));
+            filteredDownloads = filteredDownloads.filter(d => d.name.toLowerCase().includes(this.searchQuery) || d.description.toLowerCase().includes(this.searchQuery));
         }
         if (this.currentCategory) {
-            downloads = downloads.filter(d => String(d.categoryId) === String(this.currentCategory));
+            filteredDownloads = filteredDownloads.filter(d => String(d.categoryId) === String(this.currentCategory));
         }
-        downloads = this.sortDownloads(downloads, this.currentSort);
+        
+        filteredDownloads = this.sortDownloads(filteredDownloads, this.currentSort);
 
-        await this.loadDownloads(downloads);
+        this.loadDownloads(filteredDownloads);
     }
 
     handleSearch(query) { this.searchQuery = query.toLowerCase().trim(); this.filterAndDisplayDownloads(); }
@@ -250,6 +280,7 @@ class DownloadHub {
     formatNumber(num) { return String(num || 0); }
     formatDate(dateString) { return new Date(dateString).toLocaleDateString('fr-FR'); }
 }
+
 
 document.addEventListener('DOMContentLoaded', () => {
     window.downloadHub = new DownloadHub();
