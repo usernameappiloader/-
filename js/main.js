@@ -201,10 +201,11 @@ class DownloadHub {
             if (download.instructions) {
                 const p = document.createElement('p');
                 p.innerText = download.instructions;
+                // MODIFICATION: Utilisation de la classe 'download-instructions' pour la compatibilité avec le thème sombre.
                 instructionsHtml = `
                     <hr>
                     <h6><i class="fas fa-info-circle me-2"></i>Instructions :</h6>
-                    <p class="small bg-light p-2 rounded download-instructions">${p.innerHTML.replace(/\n/g, '<br>')}</p>
+                    <div class="download-instructions">${p.innerHTML.replace(/\n/g, '<br>')}</div>
                 `;
             }
 
