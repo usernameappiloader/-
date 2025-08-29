@@ -100,6 +100,16 @@ class FirestoreStorage {
         };
         await this.db.collection('activities').add(activity);
     }
+    // Incrémente le compteur de téléchargements et ajoute une activité
+    async incrementDownloadCount(downloadId) {
+        const downloadRef = this.db.collection('downloads').doc(downloadId.toString());
+        // Utilise l'opérateur atomique FieldValue.increment pour éviter les conflits de données
+        // et garantir que chaque téléchargement est compté, même avec plusieurs utilisateurs simultanés.
+        await downloadRef.update({
+            downloads: firebase.firestore.FieldValue.increment(1)
+        });
+    }
+
 
     // --- Statistiques ---
     async getStats() {
