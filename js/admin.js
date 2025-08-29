@@ -198,7 +198,7 @@ class AdminPanel {
         await this.loadDashboard();
     }
 
-    async editDownload(id) {
+ async editDownload(id) {
         const download = await window.dataStorage.getDownloadById(id);
         if (download) {
             await this.populateCategoriesSelect();
@@ -206,6 +206,7 @@ class AdminPanel {
             document.getElementById('editDownloadName').value = download.name;
             document.getElementById('editDownloadCategory').value = download.categoryId;
             document.getElementById('editDownloadDescription').value = download.description;
+            document.getElementById('editDownloadInstructions').value = download.instructions || '';
             document.getElementById('editDownloadUrl').value = download.url;
             document.getElementById('editDownloadVersion').value = download.version;
             document.getElementById('editDownloadSize').value = download.size;
@@ -226,6 +227,7 @@ class AdminPanel {
             categoryId: selectedOption.value,
             category: selectedOption.text,
             description: document.getElementById('editDownloadDescription').value.trim(),
+            instructions: document.getElementById('editDownloadInstructions').value.trim(),
             url: document.getElementById('editDownloadUrl').value.trim(),
             version: document.getElementById('editDownloadVersion').value.trim(),
             size: document.getElementById('editDownloadSize').value.trim(),
