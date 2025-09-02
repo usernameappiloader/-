@@ -1,59 +1,443 @@
-/* ===== RESPONSIVE DESIGN ===== */
+/* ===== MOBILE ENHANCEMENTS STYLES ===== */
 
-/* Large Devices (desktops, 992px and up) */
-@media (min-width: 992px) {
-    .hero-section {
-        padding: 14rem 0 8rem 0;
+/* ===== PWA STYLES ===== */
+.pwa-install-btn {
+    margin-left: 1rem;
+    position: relative;
+}
+
+.pwa-install-btn.active {
+    background-color: var(--primary-accent);
+    border-color: var(--primary-accent);
+    color: var(--bg-dark);
+}
+
+.pwa-status-notification,
+.pwa-update-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--primary-accent);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    z-index: 1000;
+    box-shadow: var(--shadow-glow);
+    animation: slideInRight 0.3s ease-out;
+}
+
+.pwa-update-notification {
+    background: linear-gradient(135deg, var(--primary-accent), var(--primary-accent-hover));
+    color: var(--bg-dark);
+    border-color: var(--primary-accent-hover);
+}
+
+/* ===== TOUCH GESTURES STYLES ===== */
+.pull-to-refresh-indicator {
+    position: fixed;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    z-index: 1000;
+    box-shadow: var(--shadow-glow);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.pull-to-refresh-indicator.ready {
+    border-color: var(--primary-accent);
+}
+
+.pull-to-refresh-indicator.refreshing .pull-spinner i {
+    animation: spin 1s linear infinite;
+}
+
+.pull-spinner {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-accent);
+    border-radius: 50%;
+    color: var(--bg-dark);
+}
+
+.pull-text {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    text-align: center;
+}
+
+.swipe-nav-dots {
+    position: fixed;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    z-index: 100;
+}
+
+.nav-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--border-color);
+    border: 2px solid var(--bg-card);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.nav-dot.active {
+    background: var(--primary-accent);
+    transform: scale(1.2);
+}
+
+.nav-dot:hover {
+    background: var(--primary-accent);
+    transform: scale(1.1);
+}
+
+/* Swipe highlight effect */
+.swipe-highlight {
+    animation: swipeHighlight 0.5s ease-out;
+}
+
+@keyframes swipeHighlight {
+    0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7); }
+    50% { box-shadow: 0 0 0 10px rgba(56, 189, 248, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+}
+
+/* Touch feedback */
+.touch-active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+}
+
+.category-card,
+.download-card,
+.btn {
+    transition: transform 0.1s ease;
+}
+
+/* ===== OFFLINE STYLES ===== */
+.offline-indicator {
+    position: fixed;
+    top: 60px;
+    right: 20px;
+    background: #dc3545;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    z-index: 1000;
+    transform: translateY(-100px);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.offline-indicator.visible {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.offline-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(17, 24, 39, 0.9);
+    backdrop-filter: blur(5px);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.offline-message {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: var(--shadow-glow);
+}
+
+.offline-icon {
+    font-size: 3rem;
+    color: #dc3545;
+    margin-bottom: 1rem;
+}
+
+.offline-features {
+    margin: 1.5rem 0;
+    text-align: left;
+}
+
+.offline-features .feature {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.offline-category,
+.offline-download {
+    position: relative;
+}
+
+.offline-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--bg-dark);
+    color: var(--text-muted);
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.offline-btn {
+    background: var(--border-color) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-muted) !important;
+    cursor: not-allowed;
+}
+
+.offline-feedback,
+.sync-notification,
+.reconnect-notification {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-card);
+    border: 1px solid var(--primary-accent);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: var(--shadow-glow);
+    animation: slideInUp 0.3s ease-out;
+}
+
+.sync-notification {
+    background: linear-gradient(135deg, var(--primary-accent), var(--primary-accent-hover));
+    color: var(--bg-dark);
+    border-color: var(--primary-accent-hover);
+}
+
+.reconnect-notification {
+    background: #28a745;
+    color: white;
+    border-color: #28a745;
+}
+
+/* ===== NOTIFICATION STYLES ===== */
+.notification-btn {
+    margin-left: 1rem;
+    position: relative;
+}
+
+.notification-btn.denied {
+    opacity: 0.5;
+}
+
+.notification-settings {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.notification-settings .setting-item {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-dark);
+}
+
+.notification-settings .form-check-input {
+    margin-right: 0.5rem;
+}
+
+.settings-saved-notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #28a745;
+    color: white;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: var(--shadow-glow);
+    animation: slideInDown 0.3s ease-out;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
     }
 }
 
-/* Medium Devices (tablets, 768px to 991px) */
-@media (max-width: 991px) {
-    .hero-section {
-        padding: 10rem 0 5rem 0;
+@keyframes slideInUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
     }
-    .navbar-collapse {
-        background: var(--bg-dark);
-        border-radius: var(--border-radius);
-        padding: 1rem;
-        margin-top: 1rem;
-        border: 1px solid var(--border-color);
-    }
-    .navbar .btn-outline-primary {
-        margin-top: 1rem;
+    to {
+        transform: translateY(0);
+        opacity: 1;
     }
 }
 
-/* Small Devices (landscape phones, 576px to 767px) */
+@keyframes slideInDown {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ===== RESPONSIVE MOBILE ENHANCEMENTS ===== */
 @media (max-width: 767px) {
-    body {
-        font-size: 0.95rem;
+    .swipe-nav-dots {
+        right: 10px;
     }
-    .hero-section {
-        padding: 8rem 0 4rem 0;
+
+    .offline-indicator,
+    .pwa-status-notification,
+    .pwa-update-notification {
+        right: 10px;
+        left: 10px;
+        width: calc(100% - 20px);
     }
-    h1.display-3 { font-size: 2.5rem; }
-    h2 { font-size: 1.75rem; }
-    .stat-item h3 { font-size: 2rem; }
+
+    .offline-feedback,
+    .sync-notification,
+    .reconnect-notification,
+    .settings-saved-notification {
+        bottom: 10px;
+        left: 10px;
+        right: 10px;
+        width: calc(100% - 20px);
+    }
+
+    .pull-to-refresh-indicator {
+        left: 10px;
+        right: 10px;
+        width: calc(100% - 20px);
+    }
+
+    .pwa-install-btn,
+    .notification-btn {
+        margin-left: 0.5rem;
+        padding: 0.5rem;
+        font-size: 0.9rem;
+    }
 }
 
-/* Extra Small Devices (portrait phones, less than 576px) */
-@media (max-width: 575px) {
-    .hero-section {
-        padding: 7rem 0 3rem 0;
+/* ===== DARK THEME SUPPORT ===== */
+@media (prefers-color-scheme: dark) {
+    .offline-indicator {
+        background: #dc3545;
     }
-     h1.display-3 { font-size: 2rem; }
-    .lead { font-size: 1rem; }
-    .search-box .form-control {
-        font-size: 0.9rem;
+
+    .offline-message {
+        background: var(--bg-card);
+        border-color: var(--border-color);
     }
-    .download-card-meta {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
+}
+
+/* ===== REDUCED MOTION SUPPORT ===== */
+@media (prefers-reduced-motion: reduce) {
+    .pull-to-refresh-indicator,
+    .offline-indicator,
+    .pwa-status-notification,
+    .offline-feedback,
+    .sync-notification,
+    .reconnect-notification,
+    .settings-saved-notification {
+        animation: none;
+        transition: none;
     }
-    .btn {
-        padding: 0.6rem 1.2rem;
-        font-size: 0.9rem;
+
+    .swipe-highlight {
+        animation: none;
+    }
+
+    .touch-active {
+        transform: none;
+    }
+}
+
+/* ===== HIGH CONTRAST SUPPORT ===== */
+@media (prefers-contrast: high) {
+    .offline-indicator {
+        border: 2px solid white;
+    }
+
+    .pull-to-refresh-indicator {
+        border: 2px solid var(--primary-accent);
+    }
+
+    .nav-dot {
+        border: 2px solid white;
+    }
+
+    .nav-dot.active {
+        background: white;
+    }
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+    .pwa-install-btn,
+    .notification-btn,
+    .offline-indicator,
+    .swipe-nav-dots,
+    .pull-to-refresh-indicator,
+    .offline-overlay {
+        display: none !important;
     }
 }
