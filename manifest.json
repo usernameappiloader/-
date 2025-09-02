@@ -1,0 +1,43 @@
+{
+  "name": "MR.DEV-TECH - Bibliothèque d'Applications",
+  "short_name": "MR.DEV-TECH",
+  "description": "La bibliothèque d'applications ultime - Trouvez, téléchargez et gérez vos logiciels favoris",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#111827",
+  "theme_color": "#38BDF8",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "fr",
+  "categories": ["productivity", "utilities", "business"],
+  "icons": [
+    {
+      "src": "/images/icon.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Applications",
+      "short_name": "Apps",
+      "description": "Voir toutes les applications",
+      "url": "/index.html#downloads",
+      "icons": [{ "src": "/images/icon-96.svg", "sizes": "96x96" }]
+    },
+    {
+      "name": "Catégories",
+      "short_name": "Cats",
+      "description": "Explorer par catégories",
+      "url": "/index.html#categories",
+      "icons": [{ "src": "/images/icon-96.svg", "sizes": "96x96" }]
+    }
+  ]
+}
