@@ -3,10 +3,14 @@
 class DownloadHub {
     constructor() {
         this.allDownloads = []; // Stocke tous les téléchargements pour un filtrage rapide
+        this.filteredDownloads = []; // Stocke les téléchargements filtrés pour la pagination
         this.currentCategory = '';
         this.currentSort = 'name';
         this.searchQuery = '';
         this.init();
+
+        // Bind the share handler to this instance
+        this.handleShare = this.handleShare.bind(this);
     }
 
     async init() {
@@ -104,6 +108,55 @@ class DownloadHub {
         return col;
     }
 
+    handleShare(downloadId) {
+        const download = this.allDownloads.find(d => d.id === downloadId);
+        if (!download) {
+            console.warn(`Download with id ${downloadId} not found for sharing.`);
+            return;
+        }
+
+        const shareData = {
+            title: download.name,
+            text: download.description,
+            url: window.location.href + `#download-${downloadId}`
+        };
+
+        if (navigator.share) {
+            navigator.share(shareData).catch((error) => {
+                console.error('Error sharing:', error);
+            });
+        } else {
+            // Fallback: open share URLs in new windows
+            const encodedUrl = encodeURIComponent(shareData.url);
+            const encodedText = encodeURIComponent(shareData.text);
+            const encodedTitle = encodeURIComponent(shareData.title);
+
+            const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+            const twitterUrl = `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedText}`;
+            const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedText}%20${encodedUrl}`;
+            const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;
+
+            // Open a small popup window with share options
+            const shareWindow = window.open('', 'Share', 'width=600,height=400');
+            if (shareWindow) {
+                shareWindow.document.write(`
+                    <html><head><title>Partager</title></head><body>
+                    <h3>Partager "${download.name}"</h3>
+                    <ul>
+                        <li><a href="${facebookUrl}" target="_blank">Facebook</a></li>
+                        <li><a href="${twitterUrl}" target="_blank">Twitter</a></li>
+                        <li><a href="${whatsappUrl}" target="_blank">WhatsApp</a></li>
+                        <li><a href="${linkedInUrl}" target="_blank">LinkedIn</a></li>
+                    </ul>
+                    </body></html>
+                `);
+                shareWindow.document.close();
+            } else {
+                alert('Veuillez autoriser les popups pour partager ce contenu.');
+            }
+        }
+    }
+
     // Cette fonction ne fait plus que l'affichage, la rendant plus simple
     loadDownloads(downloads) {
         const downloadsContainer = document.getElementById('downloadsContainer');
@@ -124,12 +177,22 @@ class DownloadHub {
         const col = document.createElement('div');
         col.className = 'col-lg-4 col-md-6 mb-4';
         const imageHtml = download.image ? `<img src="${download.image}" alt="${download.name}" loading="lazy">` : `<div class="download-card-image-placeholder"><i class="fas fa-image"></i></div>`;
+        const isFavorite = window.uiEnhancements ? window.uiEnhancements.isFavorite(download.id) : false;
+        const favoriteIcon = isFavorite ? 'fas fa-heart' : 'far fa-heart';
 
         col.innerHTML = `
             <div class="download-card" style="animation-delay: ${index * 0.1}s">
                 <div class="download-card-image">${imageHtml}</div>
                 <div class="download-card-body">
-                    <h5 class="download-card-title">${download.name}</h5>
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="download-card-title">${download.name}</h5>
+                        <button class="btn btn-sm favorite-btn ${isFavorite ? 'active' : ''}"
+                                data-download-id="${download.id}"
+                                onclick="window.uiEnhancements.toggleFavorite('${download.id}')"
+                                title="${isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}">
+                            <i class="${favoriteIcon}"></i>
+                        </button>
+                    </div>
                     <p class="download-card-description">${download.description}</p>
                     <div class="download-card-meta">
                         <span><i class="fas fa-tag me-1"></i>${download.category}</span>
@@ -137,7 +200,12 @@ class DownloadHub {
                     </div>
                     <div class="download-card-footer">
                         <small class="text-muted"><i class="fas fa-calendar me-1"></i>${this.formatDate(download.dateAdded)}</small>
-                        <button class="btn download-btn" onclick="window.downloadHub.handleDownload('${download.id}')">Télécharger</button>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm share-btn" onclick="window.downloadHub.handleShare('${download.id}')" title="Partager">
+                                <i class="fas fa-share-alt"></i>
+                            </button>
+                            <button class="btn download-btn" onclick="window.downloadHub.handleDownload('${download.id}')">Télécharger</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -148,7 +216,7 @@ class DownloadHub {
     // Cette fonction est maintenant beaucoup plus rapide car elle ne recharge pas les données
     filterAndDisplayDownloads() {
         this.showSectionLoader('downloadsContainer');
-        
+
         let filteredDownloads = [...this.allDownloads]; // On travaille sur une copie
 
         if (this.searchQuery) {
@@ -157,17 +225,44 @@ class DownloadHub {
         if (this.currentCategory) {
             filteredDownloads = filteredDownloads.filter(d => String(d.categoryId) === String(this.currentCategory));
         }
-        
-        filteredDownloads = this.sortDownloads(filteredDownloads, this.currentSort);
 
-        this.loadDownloads(filteredDownloads);
+        filteredDownloads = this.sortDownloads(filteredDownloads, this.currentSort);
+        this.filteredDownloads = filteredDownloads; // Stocke pour la pagination
+
+    // Reset to page 1 when filtering
+    // Removed resetting currentPage here to fix pagination issue
+    // if (window.uiEnhancements) {
+    //     window.uiEnhancements.currentPage = 1;
+    // }
+
+        this.loadDownloadsWithPagination(filteredDownloads);
     }
 
-    handleSearch(query) { this.searchQuery = query.toLowerCase().trim(); this.filterAndDisplayDownloads(); }
-    handleSort(sortBy) { this.currentSort = sortBy; this.filterAndDisplayDownloads(); }
+    loadDownloadsWithPagination(downloads) {
+        if (window.uiEnhancements) {
+            const paginatedDownloads = window.uiEnhancements.getPaginatedItems(downloads);
+            window.uiEnhancements.updatePagination(downloads.length);
+            this.loadDownloads(paginatedDownloads);
+            console.log(`Pagination: Showing ${paginatedDownloads.length} of ${downloads.length} downloads on page ${window.uiEnhancements.currentPage}`);
+        } else {
+            this.loadDownloads(downloads);
+        }
+    }
+
+    handleSearch(query) { 
+        this.searchQuery = query.toLowerCase().trim(); 
+        if(window.uiEnhancements) window.uiEnhancements.currentPage = 1; 
+        this.filterAndDisplayDownloads(); 
+    }
+    handleSort(sortBy) { 
+        this.currentSort = sortBy; 
+        if(window.uiEnhancements) window.uiEnhancements.currentPage = 1; 
+        this.filterAndDisplayDownloads(); 
+    }
     handleCategoryFilter(categoryId) {
         this.currentCategory = categoryId;
         document.getElementById('categoryFilter').value = categoryId;
+        if(window.uiEnhancements) window.uiEnhancements.currentPage = 1; 
         this.filterAndDisplayDownloads();
     }
     
@@ -283,9 +378,33 @@ class DownloadHub {
 }
 
 
+// Wait for both DOMContentLoaded and UIEnhancements to be ready
 document.addEventListener('DOMContentLoaded', () => {
+    // Check if UIEnhancements is already initialized
+    if (window.uiEnhancements) {
+        initializeDownloadHub();
+    } else {
+        // Wait for UIEnhancements to be initialized with timeout
+        let attempts = 0;
+        const maxAttempts = 500; // 5 seconds max wait
+
+        const checkUIEnhancements = setInterval(() => {
+            attempts++;
+            if (window.uiEnhancements) {
+                clearInterval(checkUIEnhancements);
+                initializeDownloadHub();
+            } else if (attempts >= maxAttempts) {
+                clearInterval(checkUIEnhancements);
+                console.warn('UIEnhancements not found after timeout, initializing DownloadHub without pagination');
+                initializeDownloadHub();
+            }
+        }, 10); // Check every 10ms
+    }
+});
+
+function initializeDownloadHub() {
     window.downloadHub = new DownloadHub();
-    
+
     const lastSeen = localStorage.getItem('welcomeModalLastSeen');
     if (!lastSeen || (new Date().getTime() - lastSeen > 24 * 60 * 60 * 1000)) {
         const welcomeModal = new bootstrap.Modal(document.getElementById('welcomeModal'));
@@ -307,7 +426,7 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('welcomeModalLastSeen', new Date().getTime());
             welcomeModal.hide();
         });
-        
+
         welcomeModal.show();
     }
-});
+}
