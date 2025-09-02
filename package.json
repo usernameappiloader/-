@@ -1,0 +1,18 @@
+{
+  "name": "public",
+  "version": "1.0.0",
+  "description": "Un site web moderne, interactif et responsive pour gérer et partager des liens de téléchargement avec un tableau de bord administrateur complet.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "firebase-admin": "^13.5.0",
+    "web-push": "^3.6.7"
+  }
+}
