@@ -64,6 +64,22 @@ class FirestoreStorage {
         }
         const ref = await this.db.collection('downloads').add(downloadData);
         await this.addActivity('upload', `${downloadData.name} a été ajouté`, ref.id);
+
+        // Send notification to all subscribers
+        try {
+            await fetch('/api/notify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title: 'Nouvelle application disponible!',
+                    message: `${downloadData.name} a été ajoutée à MR.DEV-TECH`,
+                    url: `/`
+                })
+            });
+        } catch (error) {
+            console.error('Failed to send notification:', error);
+        }
+
         return { id: ref.id, ...downloadData };
     }
 
