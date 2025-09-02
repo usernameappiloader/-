@@ -19,9 +19,13 @@
     <!-- Custom Stylesheets -->
     <link href="css/style.css" rel="stylesheet">
     <link href="css/responsive.css" rel="stylesheet">
+    <link href="css/mobile-enhancements.css" rel="stylesheet">
 
     <!-- Favicon -->
     <link rel="shortcut icon" href="images/icon.png" type="image/x-icon">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
 </head>
 <body class="bg-dark text-light">
 
@@ -49,6 +53,11 @@
                     <li class="nav-item"><a class="nav-link active" href="#home">Accueil</a></li>
                     <li class="nav-item"><a class="nav-link" href="#downloads">Téléchargements</a></li>
                     <li class="nav-item"><a class="nav-link" href="#categories">Catégories</a></li>
+                    <li class="nav-item">
+                        <button class="btn theme-toggle-btn" id="theme-toggle" title="Changer de thème">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                    </li>
                     <li class="nav-item">
                          <a href="login.html" class="btn btn-outline-primary ms-lg-3"><i class="fas fa-user-shield me-2"></i>Admin</a>
                     </li>
@@ -95,6 +104,27 @@
             </div>
             <div class="row" id="downloadsContainer">
                 <!-- Les cartes de téléchargement seront injectées ici par JS -->
+            </div>
+            <!-- Pagination Container -->
+            <div id="pagination-container" class="pagination-container" style="display: none;">
+                <div class="pagination-info">
+                    <span id="pagination-info">Page 1 sur 1</span>
+                </div>
+                <nav aria-label="Pagination">
+                    <ul class="pagination pagination-custom">
+                        <li class="page-item">
+                            <button class="page-link" id="prev-page" disabled>
+                                <i class="fas fa-chevron-left"></i> Précédent
+                            </button>
+                        </li>
+                        <!-- Page numbers will be inserted here by JavaScript -->
+                        <li class="page-item">
+                            <button class="page-link" id="next-page" disabled>
+                                Suivant <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
             </div>
         </div>
     </section>
@@ -187,7 +217,14 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="js/firebase-init.js"></script>
-    <script src="js/firestore-storage.js"></script> 
-    <script src="js/main.js"></script>        
+    <script src="js/firestore-storage.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/ui-enhancements.js"></script>
+
+    <!-- Mobile Enhancements -->
+    <script src="js/pwa-manager.js"></script>
+    <script src="js/touch-gestures.js"></script>
+    <script src="js/offline-manager.js"></script>
+    <script src="js/notification-manager.js"></script>
 </body>
 </html>
