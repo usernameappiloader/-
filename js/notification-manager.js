@@ -4,19 +4,31 @@ class NotificationManager {
     constructor() {
         this.isSupported = 'serviceWorker' in navigator && 'PushManager' in window;
         this.subscription = null;
-        this.vapidPublicKey = null; // Would be set from server config
+        this.vapidPublicKey = null; // Will be fetched from server
         this.init();
     }
 
-    init() {
+    async init() {
         if (!this.isSupported) {
             console.log('[Notifications] Not supported in this browser');
             return;
         }
 
+        await this.fetchVapidPublicKey();
         this.setupNotificationUI();
         this.checkPermissionStatus();
         this.loadUserPreferences();
+        this.loadSubscription();
+    }
+
+    async fetchVapidPublicKey() {
+        try {
+            const response = await fetch('/api/vapid-public-key');
+            const data = await response.json();
+            this.vapidPublicKey = data.publicKey;
+        } catch (error) {
+            console.error('[Notifications] Failed to fetch VAPID public key:', error);
+        }
     }
 
     // Setup notification UI elements
@@ -70,7 +82,7 @@ class NotificationManager {
 
             if (permission === 'granted') {
                 console.log('[Notifications] Permission granted');
-                this.registerPushSubscription();
+                await this.registerPushSubscription();
                 this.showWelcomeNotification();
             } else {
                 console.log('[Notifications] Permission denied');
@@ -95,7 +107,7 @@ class NotificationManager {
             this.subscription = subscription;
             console.log('[Notifications] Push subscription registered:', subscription);
 
-            // Send subscription to server (would be implemented)
+            // Send subscription to server
             await this.sendSubscriptionToServer(subscription);
 
         } catch (error) {
@@ -105,18 +117,27 @@ class NotificationManager {
 
     // Send subscription to server
     async sendSubscriptionToServer(subscription) {
-        // This would send the subscription to your server
-        // For now, we'll just store it locally
-        const subscriptionData = {
-            endpoint: subscription.endpoint,
-            keys: {
-                p256dh: this.arrayBufferToBase64(subscription.getKey('p256dh')),
-                auth: this.arrayBufferToBase64(subscription.getKey('auth'))
+        try {
+            const response = await fetch('/api/subscribe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(subscription)
+            });
+            if (!response.ok) {
+                throw new Error('Failed to send subscription to server');
             }
-        };
+            console.log('[Notifications] Subscription sent to server');
+        } catch (error) {
+            console.error('[Notifications] Error sending subscription to server:', error);
+        }
+    }
 
-        localStorage.setItem('push-subscription', JSON.stringify(subscriptionData));
-        console.log('[Notifications] Subscription stored locally');
+    // Load subscription from localStorage (optional)
+    loadSubscription() {
+        const stored = localStorage.getItem('push-subscription');
+        if (stored) {
+            this.subscription = JSON.parse(stored);
+        }
     }
 
     // Show welcome notification
